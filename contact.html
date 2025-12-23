@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - SootheSpace 🌸</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Contact-specific styles */
+        .page-header {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--soft-blue) 100%);
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .contact-main {
+            padding: 4rem 0;
+            background-color: var(--white);
+        }
+        
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+        
+        @media (max-width: 992px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .contact-form {
+            background-color: var(--light-blue);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--pastel-blue);
+            border-radius: 8px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--white);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--medium-blue);
+            box-shadow: 0 0 0 3px rgba(122, 184, 217, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--medium-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(122, 184, 217, 0.3);
+        }
+        
+        .contact-info {
+            padding: 2rem;
+        }
+        
+        .info-card {
+            background-color: var(--light-blue);
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px var(--shadow);
+            text-align: center;
+        }
+        
+        .info-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--medium-blue);
+        }
+        
+        .contact-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .method {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: 0 5px 15px var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .method:hover {
+            transform: translateY(-5px);
+        }
+        
+        .method-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--medium-blue);
+        }
+        
+        .faq-section {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--soft-blue) 0%, var(--light-blue) 100%);
+        }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        
+        .faq-question:hover {
+            background-color: var(--light-blue);
+        }
+        
+        .faq-icon {
+            font-size: 1.5rem;
+            color: var(--medium-blue);
+        }
+        
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: var(--text-light);
+        }
+        
+        .faq-answer.active {
+            padding: 0 1.5rem 1.5rem;
+            max-height: 500px;
+        }
+        
+        .support-response {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+        
+        .response-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--medium-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+                <li><a href="login.html" class="btn-login">Log In</a></li>
+                <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+            </ul>
+            <div class="menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Contact Us 📞</h1>
+            <p class="section-intro">We're here to help and support you on your wellness journey</p>
+        </div>
+    </section>
+
+    <!-- Contact Main -->
+    <section class="contact-main">
+        <div class="container">
+            <div class="contact-container">
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <h2>Send us a Message 💌</h2>
+                    <p style="margin-bottom: 2rem; color: var(--text-light);">We typically respond within 24 hours</p>
+                    
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name"><i class="fas fa-user"></i> Your Name</label>
+                            <input type="text" id="name" class="form-control" placeholder="Enter your name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
+                            <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject"><i class="fas fa-tag"></i> Subject</label>
+                            <select id="subject" class="form-control" required>
+                                <option value="">Select a topic</option>
+                                <option value="support">Technical Support</option>
+                                <option value="feedback">Feedback & Suggestions</option>
+                                <option value="privacy">Privacy & Data Questions</option>
+                                <option value="partnership">Partnership Opportunities</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message"><i class="fas fa-comment"></i> Your Message</label>
+                            <textarea id="message" class="form-control" placeholder="How can we help you?" required></textarea>
+                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.9rem;">
+                                <span id="char-count">0 characters</span>
+                                <span id="word-count">0 words</span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="contact-info">
+                    <div class="info-card">
+                        <div class="info-icon">🌸</div>
+                        <h3>Get in Touch</h3>
+                        <p>We're committed to providing the best support for our community. Whether you have questions, feedback, or need assistance, we're here for you.</p>
+                    </div>
+                    
+                    <h3>Contact Methods 📱</h3>
+                    <div class="contact-methods">
+                        <div class="method">
+                            <div class="method-icon">📧</div>
+                            <h4>Email</h4>
+                            <p>support@soothespace.com</p>
+                            <p style="font-size: 0.9rem; color: var(--text-light);">For general inquiries</p>
+                        </div>
+                        
+                        <div class="method">
+                            <div class="method-icon">🔐</div>
+                            <h4>Privacy</h4>
+                            <p>privacy@soothespace.com</p>
+                            <p style="font-size: 0.9rem; color: var(--text-light);">Data & privacy questions</p>
+                        </div>
+                        
+                        <div class="method">
+                            <div class="method-icon">💬</div>
+                            <h4>Community</h4>
+                            <p>Join our Discord</p>
+                            <p style="font-size: 0.9rem; color: var(--text-light);">Connect with others</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2>Frequently Asked Questions ❓</h2>
+            <p class="section-intro">Quick answers to common questions</p>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is SootheSpace really free?</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! SootheSpace is completely free to use. We believe mental health support should be accessible to everyone. We never charge for our core features and we don't show ads.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do you protect my privacy?</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Your privacy is our top priority. All data is encrypted, we don't sell your information, and your journal entries are private by default. You can export or delete your data anytime.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is this a replacement for therapy?</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>No. SootheSpace is designed as a self-help tool for emotional tracking and wellness. It's not a replacement for professional mental health care. We always encourage seeking professional help when needed.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What age group is SootheSpace for?</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We're designed for youth and young adults (ages 13-25), but anyone can benefit from our tools. Our content and features are tailored to be youth-friendly and accessible.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I use SootheSpace on my phone?</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! SootheSpace works on all devices - phones, tablets, and computers. We're also working on mobile apps for even better mobile experience.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="support-response">
+                <div class="response-icon">⏱️</div>
+                <h3>Our Support Promise</h3>
+                <p>We strive to respond to all messages within 24 hours during weekdays. For urgent matters related to account security, we prioritize faster responses.</p>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-light);">
+                    <i class="fas fa-clock"></i> Support Hours: Monday-Friday, 9AM-6PM EST
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SootheSpace 🌸</h3>
+                    <p>A safe haven for mental wellness, designed with care for young minds.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="resources.html">Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Data Safety</a></li>
+                        <li><a href="#">Crisis Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Get Help</h4>
+                    <p>If you're in crisis, please contact:</p>
+                    <p class="crisis-line"><i class="fas fa-phone"></i> National Crisis Line: 988</p>
+                    <p class="crisis-line"><i class="fas fa-comment"></i> Crisis Text Line: Text HOME to 741741</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 SootheSpace. All rights reserved. Made with <i class="fas fa-heart"></i> for youth mental wellness.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Character and word count for message
+            const messageTextarea = document.getElementById('message');
+            const charCount = document.getElementById('char-count');
+            const wordCount = document.getElementById('word-count');
+            
+            function updateCounts() {
+                const text = messageTextarea.value;
+                const chars = text.length;
+                const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+                
+                charCount.textContent = `${chars} characters`;
+                wordCount.textContent = `${words} words`;
+                
+                if (chars > 500) {
+                    charCount.style.color = '#00b894';
+                } else if (chars > 250) {
+                    charCount.style.color = '#fdcb6e';
+                } else {
+                    charCount.style.color = 'var(--text-light)';
+                }
+            }
+            
+            messageTextarea.addEventListener('input', updateCounts);
+            updateCounts();
+            
+            // Contact form submission
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const subject = document.getElementById('subject').value;
+                const message = document.getElementById('message').value.trim();
+                
+                // Validate form
+                if (!name || !email || !subject || !message) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = document.querySelector('.submit-btn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                submitBtn.disabled = true;
+                
+                // Simulate sending
+                setTimeout(() => {
+                    alert('Thank you for your message! We\'ll get back to you soon. 🌸');
+                    document.getElementById('contactForm').reset();
+                    updateCounts();
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 1500);
+            });
+            
+            function isValidEmail(email) {
+                const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+            
+            // FAQ Accordion
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const icon = this.querySelector('.faq-icon');
+                    
+                    // Toggle answer
+                    if (answer.classList.contains('active')) {
+                        answer.classList.remove('active');
+                        icon.textContent = '+';
+                    } else {
+                        // Close other answers
+                        document.querySelectorAll('.faq-answer.active').forEach(ans => {
+                            ans.classList.remove('active');
+                            ans.previousElementSibling.querySelector('.faq-icon').textContent = '+';
+                        });
+                        
+                        answer.classList.add('active');
+                        icon.textContent = '−';
+                    }
+                });
+            });
+            
+            // Open first FAQ by default
+            if (faqQuestions.length > 0) {
+                faqQuestions[0].click();
+            }
+        });
+    </script>
+</body>
+</html>

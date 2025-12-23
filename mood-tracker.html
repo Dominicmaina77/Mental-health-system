@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Tracker - SootheSpace 🌸</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Mood Tracker specific styles */
+        .page-header {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--soft-blue) 100%);
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .mood-tracker {
+            padding: 4rem 0;
+            background-color: var(--white);
+        }
+        
+        .tracker-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .mood-selector {
+            background-color: var(--light-blue);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        
+        .mood-emojis {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+        }
+        
+        .mood-emoji {
+            font-size: 3rem;
+            cursor: pointer;
+            padding: 1rem;
+            border-radius: 50%;
+            transition: var(--transition);
+            background-color: var(--white);
+        }
+        
+        .mood-emoji:hover {
+            transform: scale(1.2);
+            background-color: var(--pastel-blue);
+        }
+        
+        .mood-emoji.active {
+            transform: scale(1.3);
+            background-color: var(--medium-blue);
+            color: white;
+            box-shadow: 0 5px 15px rgba(122, 184, 217, 0.3);
+        }
+        
+        .mood-slider-container {
+            margin: 2rem 0;
+        }
+        
+        .mood-slider {
+            width: 100%;
+            height: 20px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(90deg, #ff7675, #fdcb6e, #00b894);
+            border-radius: 10px;
+            outline: none;
+        }
+        
+        .mood-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            background-color: var(--white);
+            border: 3px solid var(--medium-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .tags-section {
+            margin: 2rem 0;
+        }
+        
+        .tags-title {
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        
+        .tag-checkbox {
+            display: none;
+        }
+        
+        .tag-label {
+            padding: 0.5rem 1rem;
+            background-color: var(--pastel-blue);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+        
+        .tag-checkbox:checked + .tag-label {
+            background-color: var(--medium-blue);
+            color: white;
+        }
+        
+        .note-section {
+            margin: 2rem 0;
+        }
+        
+        .note-textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--pastel-blue);
+            border-radius: 8px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            min-height: 120px;
+            resize: vertical;
+            background-color: var(--light-blue);
+        }
+        
+        .note-textarea:focus {
+            outline: none;
+            border-color: var(--medium-blue);
+            box-shadow: 0 0 0 3px rgba(122, 184, 217, 0.2);
+        }
+        
+        .save-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--medium-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .save-button:hover {
+            background-color: var(--dark-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(122, 184, 217, 0.3);
+        }
+        
+        .recent-moods {
+            margin-top: 4rem;
+        }
+        
+        .mood-history {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .mood-day {
+            background-color: var(--light-blue);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .mood-day-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .mood-day-date {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+        
+        .mood-day-value {
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        
+        .streak-section {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-lavender) 100%);
+            border-radius: var(--radius);
+            color: white;
+        }
+        
+        .streak-number {
+            font-size: 3rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .streak-label {
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .mood-emojis {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .mood-emoji {
+                font-size: 2.5rem;
+            }
+            
+            .tags-container {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="mood-tracker.html" class="active">Mood Tracker</a></li>
+                <li><a href="journal.html">Journal</a></li>
+                <li><a href="insights.html">Insights</a></li>
+                <li><a href="reminders.html">Reminders</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="login.html" class="btn-login">Log Out</a></li>
+            </ul>
+            <div class="menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Mood Tracker 😊</h1>
+            <p class="section-intro">Track your emotions daily and discover patterns over time</p>
+        </div>
+    </section>
+
+    <!-- Mood Tracker Main -->
+    <section class="mood-tracker">
+        <div class="container">
+            <div class="tracker-container">
+                <!-- Mood Selector -->
+                <div class="mood-selector">
+                    <h2>How are you feeling today?</h2>
+                    <p>Select your current mood from the options below</p>
+                    
+                    <div class="mood-emojis">
+                        <div class="mood-emoji" data-value="1" data-emoji="😢">😢</div>
+                        <div class="mood-emoji" data-value="3" data-emoji="😞">😞</div>
+                        <div class="mood-emoji" data-value="5" data-emoji="😐">😐</div>
+                        <div class="mood-emoji active" data-value="7" data-emoji="🙂">🙂</div>
+                        <div class="mood-emoji" data-value="9" data-emoji="😊">😊</div>
+                    </div>
+                    
+                    <div class="mood-slider-container">
+                        <input type="range" min="1" max="10" value="7" class="mood-slider" id="mood-slider">
+                        <div class="slider-labels">
+                            <span>Very Low</span>
+                            <span>Neutral</span>
+                            <span>Excellent</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tags-section">
+                        <h3 class="tags-title">What's affecting your mood today? (Optional)</h3>
+                        <div class="tags-container">
+                            <input type="checkbox" id="tag-school" class="tag-checkbox" value="school">
+                            <label for="tag-school" class="tag-label">School</label>
+                            
+                            <input type="checkbox" id="tag-relationship" class="tag-checkbox" value="relationship">
+                            <label for="tag-relationship" class="tag-label">Relationship</label>
+                            
+                            <input type="checkbox" id="tag-stress" class="tag-checkbox" value="stress">
+                            <label for="tag-stress" class="tag-label">Stress</label>
+                            
+                            <input type="checkbox" id="tag-family" class="tag-checkbox" value="family">
+                            <label for="tag-family" class="tag-label">Family</label>
+                            
+                            <input type="checkbox" id="tag-friends" class="tag-checkbox" value="friends">
+                            <label for="tag-friends" class="tag-label">Friends</label>
+                            
+                            <input type="checkbox" id="tag-health" class="tag-checkbox" value="health">
+                            <label for="tag-health" class="tag-label">Health</label>
+                            
+                            <input type="checkbox" id="tag-work" class="tag-checkbox" value="work">
+                            <label for="tag-work" class="tag-label">Work</label>
+                            
+                            <input type="checkbox" id="tag-weather" class="tag-checkbox" value="weather">
+                            <label for="tag-weather" class="tag-label">Weather</label>
+                        </div>
+                    </div>
+                    
+                    <div class="note-section">
+                        <h3>Add a note (Optional)</h3>
+                        <textarea class="note-textarea" id="mood-note" placeholder="Write about what's on your mind..."></textarea>
+                    </div>
+                    
+                    <button class="save-button" id="save-mood">
+                        <i class="fas fa-save"></i> Save Today's Mood
+                    </button>
+                </div>
+                
+                <!-- Recent Moods -->
+                <div class="recent-moods">
+                    <h2>Your Recent Moods 📅</h2>
+                    <p>Track your emotional journey over time</p>
+                    
+                    <div class="mood-history">
+                        <div class="mood-day">
+                            <div class="mood-day-emoji">😊</div>
+                            <div class="mood-day-date">Today</div>
+                            <div class="mood-day-value">7/10 - Good</div>
+                        </div>
+                        
+                        <div class="mood-day">
+                            <div class="mood-day-emoji">🙂</div>
+                            <div class="mood-day-date">Yesterday</div>
+                            <div class="mood-day-value">6/10 - Okay</div>
+                        </div>
+                        
+                        <div class="mood-day">
+                            <div class="mood-day-emoji">😐</div>
+                            <div class="mood-day-date">Nov 12</div>
+                            <div class="mood-day-value">5/10 - Neutral</div>
+                        </div>
+                        
+                        <div class="mood-day">
+                            <div class="mood-day-emoji">😊</div>
+                            <div class="mood-day-date">Nov 11</div>
+                            <div class="mood-day-value">8/10 - Very Good</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Streak Section -->
+                <div class="streak-section">
+                    <span class="streak-number">5</span>
+                    <span class="streak-label">Day Mood Tracking Streak! 🔥</span>
+                    <p style="margin-top: 1rem; opacity: 0.9;">Keep going! Consistency helps you understand yourself better.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SootheSpace 🌸</h3>
+                    <p>A safe haven for mental wellness, designed with care for young minds.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="resources.html">Resources</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Data Safety</a></li>
+                        <li><a href="#">Crisis Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Get Help</h4>
+                    <p>If you're in crisis, please contact:</p>
+                    <p class="crisis-line"><i class="fas fa-phone"></i> National Crisis Line: 988</p>
+                    <p class="crisis-line"><i class="fas fa-comment"></i> Crisis Text Line: Text HOME to 741741</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 SootheSpace. All rights reserved. Made with <i class="fas fa-heart"></i> for youth mental wellness.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const moodEmojis = document.querySelectorAll('.mood-emoji');
+            const moodSlider = document.getElementById('mood-slider');
+            let selectedMood = 7;
+            let selectedEmoji = '🙂';
+            
+            // Update slider color based on value
+            function updateSliderColor(value) {
+                const percent = ((value - 1) / 9) * 100;
+                moodSlider.style.background = `linear-gradient(to right, #ff7675 0%, #fdcb6e 50%, #00b894 100%)`;
+            }
+            
+            // Initialize slider color
+            updateSliderColor(moodSlider.value);
+            
+            // Emoji click handler
+            moodEmojis.forEach(emoji => {
+                emoji.addEventListener('click', function() {
+                    moodEmojis.forEach(e => e.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    selectedMood = parseInt(this.getAttribute('data-value'));
+                    selectedEmoji = this.getAttribute('data-emoji');
+                    moodSlider.value = selectedMood;
+                    updateSliderColor(selectedMood);
+                });
+            });
+            
+            // Slider change handler
+            moodSlider.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                updateSliderColor(value);
+                
+                // Find closest emoji
+                let closestEmoji = null;
+                let minDiff = Infinity;
+                
+                moodEmojis.forEach(emoji => {
+                    const emojiValue = parseInt(emoji.getAttribute('data-value'));
+                    const diff = Math.abs(emojiValue - value);
+                    
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestEmoji = emoji;
+                    }
+                });
+                
+                if (closestEmoji) {
+                    moodEmojis.forEach(e => e.classList.remove('active'));
+                    closestEmoji.classList.add('active');
+                    selectedMood = parseInt(closestEmoji.getAttribute('data-value'));
+                    selectedEmoji = closestEmoji.getAttribute('data-emoji');
+                }
+            });
+            
+            // Save mood button
+            document.getElementById('save-mood').addEventListener('click', function() {
+                const note = document.getElementById('mood-note').value.trim();
+                const tags = [];
+                
+                document.querySelectorAll('.tag-checkbox:checked').forEach(checkbox => {
+                    tags.push(checkbox.value);
+                });
+                
+                // Show loading state
+                const saveBtn = this;
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveBtn.disabled = true;
+                
+                // Simulate save
+                setTimeout(() => {
+                    alert(`Mood saved: ${selectedEmoji} (${selectedMood}/10)`);
+                    
+                    // Reset form
+                    document.getElementById('mood-note').value = '';
+                    document.querySelectorAll('.tag-checkbox').forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    
+                    // Update streak
+                    const streakNumber = document.querySelector('.streak-number');
+                    const currentStreak = parseInt(streakNumber.textContent);
+                    streakNumber.textContent = currentStreak + 1;
+                    
+                    // Reset button
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                    
+                    // Add to recent moods
+                    const moodHistory = document.querySelector('.mood-history');
+                    const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    
+                    const newMoodDay = document.createElement('div');
+                    newMoodDay.className = 'mood-day';
+                    newMoodDay.innerHTML = `
+                        <div class="mood-day-emoji">${selectedEmoji}</div>
+                        <div class="mood-day-date">Today</div>
+                        <div class="mood-day-value">${selectedMood}/10 - ${getMoodLabel(selectedMood)}</div>
+                    `;
+                    
+                    // Add to beginning
+                    moodHistory.insertBefore(newMoodDay, moodHistory.firstChild);
+                    
+                    // Limit to 4 items
+                    if (moodHistory.children.length > 4) {
+                        moodHistory.removeChild(moodHistory.lastChild);
+                    }
+                }, 1000);
+            });
+            
+            function getMoodLabel(value) {
+                const labels = {
+                    1: 'Very Low',
+                    2: 'Low',
+                    3: 'Somewhat Low',
+                    4: 'A Bit Low',
+                    5: 'Neutral',
+                    6: 'Okay',
+                    7: 'Good',
+                    8: 'Very Good',
+                    9: 'Great',
+                    10: 'Excellent'
+                };
+                return labels[value] || 'Neutral';
+            }
+        });
+    </script>
+</body>
+</html>

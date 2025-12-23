@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal - SootheSpace 🌸</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        .journal-header {
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--soft-blue) 100%);
+            text-align: center;
+        }
+        
+        .journal-container {
+            padding: 3rem 0;
+            background-color: var(--white);
+        }
+        
+        .journal-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        @media (max-width: 992px) {
+            .journal-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .editor-section, .entries-section {
+            background-color: var(--light-blue);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--pastel-blue);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background-color: var(--white);
+        }
+        
+        textarea.form-control {
+            min-height: 200px;
+        }
+        
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .tag-option {
+            padding: 0.5rem 1rem;
+            background-color: var(--pastel-blue);
+            border-radius: 50px;
+            cursor: pointer;
+        }
+        
+        .tag-option.selected {
+            background-color: var(--medium-blue);
+            color: white;
+        }
+        
+        .journal-entry {
+            background-color: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--medium-blue);
+        }
+        
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, var(--medium-blue) 0%, var(--dark-blue) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="mood-tracker.html">Mood Tracker</a></li>
+                <li><a href="journal.html" class="active">Journal</a></li>
+                <li><a href="insights.html">Insights</a></li>
+                <li><a href="reminders.html">Reminders</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="login.html" class="btn-login">Log Out</a></li>
+            </ul>
+            <div class="menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <section class="journal-header">
+        <div class="container">
+            <h1>My Journal 📝</h1>
+            <p>Write, save, and reflect on your thoughts privately</p>
+        </div>
+    </section>
+
+    <section class="journal-container">
+        <div class="container">
+            <div class="journal-layout">
+                <div class="editor-section">
+                    <h3>New Entry ✨</h3>
+                    <input type="text" class="form-control" placeholder="Title (optional)" id="entry-title">
+                    <textarea class="form-control" placeholder="Write your thoughts here..." id="entry-content"></textarea>
+                    
+                    <div class="tags-container">
+                        <div class="tag-option" data-tag="reflection">Reflection</div>
+                        <div class="tag-option" data-tag="gratitude">Gratitude</div>
+                        <div class="tag-option" data-tag="stress">Stress</div>
+                        <div class="tag-option" data-tag="achievement">Achievement</div>
+                    </div>
+                    
+                    <button class="btn-primary" id="save-entry" style="width: 100%;">
+                        <i class="fas fa-save"></i> Save Entry
+                    </button>
+                    
+                    <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-light);">
+                        <i class="fas fa-lock"></i> Private by default - only you can see this
+                    </p>
+                </div>
+                
+                <div class="entries-section">
+                    <h3>Recent Entries 📚</h3>
+                    <div class="journal-entries">
+                        <div class="journal-entry">
+                            <div class="entry-header">
+                                <strong>Today's Reflection</strong>
+                                <span style="font-size: 0.9rem; color: var(--text-light);">Today</span>
+                            </div>
+                            <p>Had a productive day. Feeling optimistic about the future. Practice gratitude for small wins.</p>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">reflection</span>
+                            </div>
+                        </div>
+                        
+                        <div class="journal-entry">
+                            <div class="entry-header">
+                                <strong>Weekend Thoughts</strong>
+                                <span style="font-size: 0.9rem; color: var(--text-light);">Nov 12</span>
+                            </div>
+                            <p>Spent time with friends. Good reminder to balance work and social life.</p>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">gratitude</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-card">
+                <h3 style="color: white;">Journaling Statistics 📊</h3>
+                <div class="stats-grid">
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700;">12</div>
+                        <div>Total Entries</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700;">5</div>
+                        <div>This Month</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: 700;">3</div>
+                        <div>Day Streak</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SootheSpace 🌸</h3>
+                    <p>A safe haven for mental wellness</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="resources.html">Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Crisis Help</h4>
+                    <p>National Crisis Line: 988</p>
+                    <p>Text HOME to 741741</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tagOptions = document.querySelectorAll('.tag-option');
+            const selectedTags = [];
+            
+            tagOptions.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    const tagValue = this.getAttribute('data-tag');
+                    
+                    if (this.classList.contains('selected')) {
+                        this.classList.remove('selected');
+                        const index = selectedTags.indexOf(tagValue);
+                        if (index > -1) selectedTags.splice(index, 1);
+                    } else {
+                        this.classList.add('selected');
+                        selectedTags.push(tagValue);
+                    }
+                });
+            });
+            
+            document.getElementById('save-entry').addEventListener('click', function() {
+                const title = document.getElementById('entry-title').value.trim();
+                const content = document.getElementById('entry-content').value.trim();
+                
+                if (!content) {
+                    alert('Please write something in your journal entry.');
+                    return;
+                }
+                
+                const btn = this;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                btn.disabled = true;
+                
+                setTimeout(() => {
+                    alert('Entry saved successfully! ✨');
+                    
+                    // Clear form
+                    document.getElementById('entry-title').value = '';
+                    document.getElementById('entry-content').value = '';
+                    tagOptions.forEach(tag => tag.classList.remove('selected'));
+                    selectedTags.length = 0;
+                    
+                    btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
+                    btn.disabled = false;
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

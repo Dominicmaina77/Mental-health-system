@@ -1,0 +1,333 @@
+/* Dashboard Specific Styles */
+
+.dashboard {
+    padding: 2rem 0 4rem;
+    background-color: var(--light-blue);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.welcome-section h1 {
+    color: var(--dark-blue);
+    margin-bottom: 0.5rem;
+}
+
+.date-display {
+    background-color: var(--white);
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px var(--shadow);
+    font-weight: 600;
+    color: var(--dark-blue);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background-color: var(--white);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px var(--shadow);
+    transition: var(--transition);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(122, 184, 217, 0.3);
+}
+
+.dashboard-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: var(--dark-blue);
+    font-size: 1.2rem;
+}
+
+/* Today's Mood Card */
+.today-mood {
+    grid-column: span 4;
+}
+
+.mood-display {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.today-mood-emoji {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: pulse 2s infinite;
+}
+
+.mood-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark-blue);
+    display: block;
+}
+
+.mood-label {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.mood-note {
+    background-color: var(--light-blue);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    text-align: left;
+    font-style: italic;
+}
+
+.no-mood {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+/* Quick Stats Card */
+.quick-stats {
+    grid-column: span 4;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--light-blue);
+    border-radius: 8px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-blue);
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    display: block;
+}
+
+/* Mood Chart Card */
+.mood-chart {
+    grid-column: span 4;
+}
+
+.chart-container {
+    height: 200px;
+    position: relative;
+}
+
+/* Quick Actions Card */
+.quick-actions {
+    grid-column: span 6;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    background-color: var(--light-blue);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: var(--transition);
+}
+
+.action-btn:hover {
+    background-color: var(--pastel-blue);
+    transform: translateY(-3px);
+}
+
+.action-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.action-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Recent Journal Card */
+.recent-journal {
+    grid-column: span 6;
+}
+
+.journal-list {
+    margin-top: 1rem;
+}
+
+.journal-item {
+    padding: 1rem;
+    background-color: var(--light-blue);
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+}
+
+.journal-item:hover {
+    background-color: var(--pastel-blue);
+}
+
+.journal-title {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.journal-date {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.view-all {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.view-all a {
+    color: var(--medium-blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.view-all a:hover {
+    text-decoration: underline;
+}
+
+/* Daily Quote Card */
+.daily-quote {
+    grid-column: span 6;
+}
+
+.quote-content {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-lavender) 100%);
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.quote-text {
+    font-style: italic;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.quote-author {
+    font-weight: 600;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Reminders Card */
+.reminders {
+    grid-column: span 6;
+}
+
+.reminder-list {
+    margin-top: 1rem;
+}
+
+.reminder-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--light-blue);
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+    gap: 1rem;
+}
+
+.reminder-time {
+    background-color: var(--medium-blue);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+}
+
+.reminder-title {
+    font-weight: 600;
+    color: var(--text-dark);
+    flex: 1;
+}
+
+/* Wellness Tip Card */
+.wellness-tip {
+    grid-column: span 12;
+    background: linear-gradient(135deg, var(--medium-blue) 0%, var(--dark-blue) 100%);
+    color: white;
+}
+
+.wellness-tip h3 {
+    color: white;
+}
+
+.tip-content {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Responsive Dashboard */
+@media (max-width: 1200px) {
+    .today-mood, .quick-stats, .mood-chart {
+        grid-column: span 6;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-card {
+        grid-column: span 1 !important;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

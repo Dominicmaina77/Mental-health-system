@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SootheSpace 🌸</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        .admin-header {
+            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--light-blue) 0%, var(--soft-blue) 100%);
+            text-align: center;
+        }
+        
+        .admin-container {
+            padding: 3rem 0;
+            background-color: var(--white);
+        }
+        
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .admin-card {
+            background-color: var(--light-blue);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .admin-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark-blue);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            display: block;
+            margin: 1rem 0;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--pastel-blue);
+        }
+        
+        .data-table th {
+            background-color: var(--pastel-blue);
+            color: var(--dark-blue);
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .edit-btn {
+            background-color: var(--medium-blue);
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: #ff7675;
+            color: white;
+        }
+        
+        .system-health {
+            background-color: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-top: 2rem;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .health-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--pastel-blue);
+        }
+        
+        .health-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .status-good {
+            background-color: #00b894;
+            color: white;
+        }
+        
+        .status-warning {
+            background-color: #fdcb6e;
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="admin.html" class="active">Admin Panel</a></li>
+                <li><a href="login.html" class="btn-login">Log Out</a></li>
+            </ul>
+            <div class="menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <section class="admin-header">
+        <div class="container">
+            <h1>Admin Panel 🔧</h1>
+            <p>Manage users, content, and system health</p>
+        </div>
+    </section>
+
+    <section class="admin-container">
+        <div class="container">
+            <div class="admin-grid">
+                <div class="admin-card">
+                    <h3><i class="fas fa-users"></i> User Management</h3>
+                    <span class="stat-number">1,248</span>
+                    <p>Active users this month</p>
+                    <button class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-user-cog"></i> Manage Users
+                    </button>
+                </div>
+                
+                <div class="admin-card">
+                    <h3><i class="fas fa-chart-line"></i> Reports</h3>
+                    <span class="stat-number">75%</span>
+                    <p>User engagement rate</p>
+                    <button class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-chart-bar"></i> View Reports
+                    </button>
+                </div>
+                
+                <div class="admin-card">
+                    <h3><i class="fas fa-file-alt"></i> Content</h3>
+                    <span class="stat-number">42</span>
+                    <p>Articles & resources</p>
+                    <button class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-edit"></i> Manage Content
+                    </button>
+                </div>
+            </div>
+            
+            <div class="admin-card">
+                <h3><i class="fas fa-user-friends"></i> Recent Users</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Alex Johnson</td>
+                            <td>alex@example.com</td>
+                            <td>Nov 15, 2023</td>
+                            <td><span class="health-status status-good">Active</span></td>
+                            <td class="user-actions">
+                                <button class="action-btn edit-btn">Edit</button>
+                                <button class="action-btn delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Maya Chen</td>
+                            <td>maya@example.com</td>
+                            <td>Nov 14, 2023</td>
+                            <td><span class="health-status status-good">Active</span></td>
+                            <td class="user-actions">
+                                <button class="action-btn edit-btn">Edit</button>
+                                <button class="action-btn delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Jordan Smith</td>
+                            <td>jordan@example.com</td>
+                            <td>Nov 12, 2023</td>
+                            <td><span class="health-status status-warning">Inactive</span></td>
+                            <td class="user-actions">
+                                <button class="action-btn edit-btn">Edit</button>
+                                <button class="action-btn delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="system-health">
+                <h3><i class="fas fa-heartbeat"></i> System Health</h3>
+                <div class="health-item">
+                    <span>Database</span>
+                    <span class="health-status status-good">Healthy</span>
+                </div>
+                <div class="health-item">
+                    <span>Server Uptime</span>
+                    <span class="health-status status-good">99.9%</span>
+                </div>
+                <div class="health-item">
+                    <span>Active Sessions</span>
+                    <span class="health-status status-good">247</span>
+                </div>
+                <div class="health-item">
+                    <span>Storage</span>
+                    <span class="health-status status-warning">75% used</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SootheSpace 🌸</h3>
+                    <p>A safe haven for mental wellness</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="resources.html">Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Crisis Help</h4>
+                    <p>National Crisis Line: 988</p>
+                    <p>Text HOME to 741741</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // User action buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userName = this.closest('tr').querySelector('td:first-child').textContent;
+                    alert(`Editing user: ${userName}`);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userName = this.closest('tr').querySelector('td:first-child').textContent;
+                    if (confirm(`Are you sure you want to delete user: ${userName}?`)) {
+                        this.closest('tr').style.opacity = '0.5';
+                        setTimeout(() => {
+                            this.closest('tr').remove();
+                        }, 500);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
