@@ -3,7 +3,7 @@
 // Load API service dynamically
 function loadApiService() {
     return new Promise((resolve, reject) => {
-        if (typeof ApiService !== 'undefined') {
+        if (typeof apiService !== 'undefined') {
             // API service already loaded
             resolve();
         } else {
