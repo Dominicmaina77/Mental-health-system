@@ -181,32 +181,69 @@ class User {
     }
 
     /**
+     * Update user status (active/inactive)
+     */
+    public function updateStatus($userId, $isActive) {
+        $query = "UPDATE " . $this->table . "
+                  SET is_active=:is_active, updated_at=:updated_at
+                  WHERE id=:id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(':is_active', $isActive, PDO::PARAM_INT);
+        $stmt->bindParam(':updated_at', getCurrentTimestamp());
+        $stmt->bindParam(':id', $userId);
+
+        if($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get all users with pagination
+     */
+    public function getAllUsers($limit = 50, $offset = 0) {
+        $query = "SELECT id, name, email, created_at, is_active
+                  FROM " . $this->table . "
+                  ORDER BY created_at DESC
+                  LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Get user statistics
      */
     public function getUserStats($userId) {
         $stats = [];
-        
+
         // Count mood entries
         $moodQuery = "SELECT COUNT(*) as count FROM mood_entries WHERE user_id = :user_id";
         $moodStmt = $this->conn->prepare($moodQuery);
         $moodStmt->bindParam(':user_id', $userId);
         $moodStmt->execute();
         $stats['mood_entries_count'] = $moodStmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
+
         // Count journal entries
         $journalQuery = "SELECT COUNT(*) as count FROM journal_entries WHERE user_id = :user_id";
         $journalStmt = $this->conn->prepare($journalQuery);
         $journalStmt->bindParam(':user_id', $userId);
         $journalStmt->execute();
         $stats['journal_entries_count'] = $journalStmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
+
         // Count active reminders
         $reminderQuery = "SELECT COUNT(*) as count FROM reminders WHERE user_id = :user_id AND is_active = 1";
         $reminderStmt = $this->conn->prepare($reminderQuery);
         $reminderStmt->bindParam(':user_id', $userId);
         $reminderStmt->execute();
         $stats['active_reminders_count'] = $reminderStmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
+
         return $stats;
     }
 }
