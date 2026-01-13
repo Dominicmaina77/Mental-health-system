@@ -1,237 +1,186 @@
 <?php
-// Include required files
-require_once '../config/config.php';
-require_once '../includes/functions.php';
-require_once '../includes/auth.php';
-require_once '../models/User.php';
+// Define the base path for includes
+$basePath = dirname(dirname(__FILE__)); // Go up two levels to get to backend/
 
-// Set content type to JSON
-header('Content-Type: application/json');
+// Include required files using absolute paths
+require_once $basePath . '/config/config.php';
+require_once $basePath . '/includes/functions.php';
+require_once $basePath . '/includes/auth.php';
+require_once $basePath . '/models/User.php';
 
-// Check if user is logged in and is admin
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit;
-}
+// Require authentication for all user operations
+$userId = requireAuth();
 
-// Check if user has admin role
-$user_id = $_SESSION['user_id'];
-$current_user = new User($db);
-
-if (!$current_user->findById($user_id)) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit;
-}
-
-// Check if user has admin role
-$is_admin = ($current_user->role === 'admin' || $current_user->role === 'moderator');
-
-if (!$is_admin) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Forbidden: Admin access required']);
-    exit;
-}
-
-// Get request method
-$method = $_SERVER['REQUEST_METHOD'];
-
-// Get request data
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
-
-// Initialize database and user model
+// Initialize database connection
 $database = new Database();
 $db = $database->getConnection();
+
+// Initialize user model
 $userModel = new User($db);
 
-switch ($action) {
-    case 'get_user':
-        $userId = $_POST['id'] ?? $_GET['id'] ?? 0;
-        
-        if (!$userId) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'User ID is required']);
-            exit;
-        }
-        
-        // Get user by ID
-        if ($userModel->findById($userId)) {
-            echo json_encode([
-                'success' => true,
-                'user' => [
-                    'id' => $userModel->id,
-                    'name' => $userModel->name,
-                    'email' => $userModel->email,
-                    'is_active' => $userModel->is_active,
-                    'created_at' => $userModel->created_at
-                ]
-            ]);
-        } else {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'User not found']);
-        }
-        break;
-        
-    case 'update_user':
-        $userId = $_POST['id'] ?? 0;
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $isActive = $_POST['is_active'] ?? 1;
-        
-        if (!$userId || !$name || !$email) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'User ID, name, and email are required']);
-            exit;
-        }
-        
-        // Check if another user already has this email
-        $existingUser = new User($db);
-        if ($existingUser->findByEmail($email) && $existingUser->id != $userId) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Another user already has this email address']);
-            exit;
-        }
-        
-        // Update the user
+// Check if user has admin role
+$currentUser = new User($db);
+if (!$currentUser->findById($userId) || !in_array($currentUser->role, ['admin', 'moderator'])) {
+    jsonResponse(['success' => false, 'message' => 'Unauthorized'], 401);
+}
+
+// Get request method and data
+$method = $_SERVER['REQUEST_METHOD'];
+$action = $_POST['action'] ?? '';
+
+if ($method === 'POST' && $action) {
+    switch ($action) {
+        case 'get_user':
+            getUser($db, $userModel);
+            break;
+        case 'update_user':
+            updateUser($db, $userModel);
+            break;
+        case 'delete_user':
+            deleteUser($db, $userModel);
+            break;
+        case 'update_role':
+            updateRole($db, $userModel);
+            break;
+        case 'add_user':
+            addUser($db, $userModel);
+            break;
+        default:
+            jsonResponse(['success' => false, 'message' => 'Invalid action'], 400);
+    }
+} else {
+    jsonResponse(['success' => false, 'message' => 'Invalid request'], 400);
+}
+
+function getUser($db, $userModel) {
+    $userId = $_POST['id'] ?? 0;
+    
+    if (!$userId) {
+        jsonResponse(['success' => false, 'message' => 'User ID is required'], 400);
+    }
+    
+    if ($userModel->findById($userId)) {
+        jsonResponse([
+            'success' => true,
+            'user' => [
+                'id' => $userModel->id,
+                'name' => $userModel->name,
+                'email' => $userModel->email,
+                'role' => $userModel->role,
+                'is_active' => $userModel->is_active,
+                'created_at' => $userModel->created_at
+            ]
+        ]);
+    } else {
+        jsonResponse(['success' => false, 'message' => 'User not found'], 404);
+    }
+}
+
+function updateUser($db, $userModel) {
+    $userId = $_POST['id'] ?? 0;
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $isActive = $_POST['is_active'] ?? 1;
+    
+    if (!$userId || !$name || !$email) {
+        jsonResponse(['success' => false, 'message' => 'User ID, name, and email are required'], 400);
+    }
+    
+    // Check if another user already has this email
+    $existingUser = new User($db);
+    if ($existingUser->findByEmail($email) && $existingUser->id != $userId) {
+        jsonResponse(['success' => false, 'message' => 'Another user already has this email address'], 400);
+    }
+    
+    try {
         $stmt = $db->prepare("UPDATE users SET name=?, email=?, is_active=?, updated_at=NOW() WHERE id=?");
         if ($stmt->execute([$name, $email, $isActive, $userId])) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'User updated successfully',
-                'user' => [
-                    'id' => $userId,
-                    'name' => $name,
-                    'email' => $email,
-                    'is_active' => $isActive
-                ]
-            ]);
+            jsonResponse(['success' => true, 'message' => 'User updated successfully']);
         } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error updating user']);
+            jsonResponse(['success' => false, 'message' => 'Failed to update user'], 500);
         }
-        break;
-        
-    case 'delete_user':
-        $userId = $_POST['id'] ?? 0;
-        
-        if (!$userId) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'User ID is required']);
-            exit;
-        }
-        
+    } catch (Exception $e) {
+        jsonResponse(['success' => false, 'message' => 'Error updating user: ' . $e->getMessage()], 500);
+    }
+}
+
+function deleteUser($db, $userModel) {
+    $userId = $_POST['id'] ?? 0;
+    
+    if (!$userId) {
+        jsonResponse(['success' => false, 'message' => 'User ID is required'], 400);
+    }
+    
+    try {
         // Soft delete the user (set is_active to 0)
         $stmt = $db->prepare("UPDATE users SET is_active=0, updated_at=NOW() WHERE id=?");
         if ($stmt->execute([$userId])) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'User deleted successfully'
-            ]);
+            jsonResponse(['success' => true, 'message' => 'User deleted successfully']);
         } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error deleting user']);
+            jsonResponse(['success' => false, 'message' => 'Failed to delete user'], 500);
         }
-        break;
-        
-    case 'get_all_users':
-        $limit = intval($_POST['limit'] ?? $_GET['limit'] ?? 50);
-        $offset = intval($_POST['offset'] ?? $_GET['offset'] ?? 0);
-        
-        // Get all users
-        $stmt = $db->prepare("SELECT id, name, email, created_at, is_active FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?");
-        $stmt->execute([$limit, $offset]);
-        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Get total count
-        $countStmt = $db->query("SELECT COUNT(*) as count FROM users");
-        $totalCount = $countStmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
-        echo json_encode([
-            'success' => true,
-            'users' => $users,
-            'total_count' => $totalCount,
-            'limit' => $limit,
-            'offset' => $offset
-        ]);
-        break;
+    } catch (Exception $e) {
+        jsonResponse(['success' => false, 'message' => 'Error deleting user: ' . $e->getMessage()], 500);
+    }
+}
 
-    case 'add_user':
-        $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-
-        if (!$name || !$email || !$password) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Name, email, and password are required']);
-            exit;
+function updateRole($db, $userModel) {
+    $userId = $_POST['id'] ?? 0;
+    $role = $_POST['role'] ?? 'user';
+    
+    if (!$userId || !in_array($role, ['user', 'moderator', 'admin'])) {
+        jsonResponse(['success' => false, 'message' => 'Valid user ID and role are required'], 400);
+    }
+    
+    try {
+        $stmt = $db->prepare("UPDATE users SET role=?, updated_at=NOW() WHERE id=?");
+        if ($stmt->execute([$role, $userId])) {
+            jsonResponse(['success' => true, 'message' => 'User role updated successfully']);
+        } else {
+            jsonResponse(['success' => false, 'message' => 'Failed to update user role'], 500);
         }
+    } catch (Exception $e) {
+        jsonResponse(['success' => false, 'message' => 'Error updating user role: ' . $e->getMessage()], 500);
+    }
+}
 
-        // Validate email format
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid email format']);
-            exit;
-        }
-
-        // Check if user already exists
-        if ($userModel->findByEmail($email)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'User with this email already exists']);
-            exit;
-        }
-
-        // Create new user
+function addUser($db, $userModel) {
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    
+    if (!$name || !$email || !$password) {
+        jsonResponse(['success' => false, 'message' => 'Name, email, and password are required'], 400);
+    }
+    
+    // Validate email format
+    if (!validateEmail($email)) {
+        jsonResponse(['success' => false, 'message' => 'Invalid email format'], 400);
+    }
+    
+    // Check if user already exists
+    if ($userModel->findByEmail($email)) {
+        jsonResponse(['success' => false, 'message' => 'User with this email already exists'], 400);
+    }
+    
+    // Hash the password
+    $hashedPassword = hashPassword($password);
+    
+    try {
         $userModel->name = $name;
         $userModel->email = $email;
-        $userModel->password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $userModel->age_group = null; // Default value
-
-        $userId = $userModel->create();
-        if ($userId) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'User created successfully',
-                'user_id' => $userId
-            ]);
+        $userModel->password_hash = $hashedPassword;
+        $userModel->role = 'user'; // Default role
+        
+        $newUserId = $userModel->create();
+        
+        if ($newUserId) {
+            jsonResponse(['success' => true, 'message' => 'User created successfully', 'user_id' => $newUserId]);
         } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error creating user']);
+            jsonResponse(['success' => false, 'message' => 'Failed to create user'], 500);
         }
-        break;
-
-    case 'update_role':
-        $userId = $_POST['id'] ?? 0;
-        $newRole = $_POST['role'] ?? 'user';
-
-        if (!$userId) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'User ID is required']);
-            exit;
-        }
-
-        if (!in_array($newRole, ['user', 'admin', 'moderator'])) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid role']);
-            exit;
-        }
-
-        // Update user role
-        $stmt = $db->prepare("UPDATE users SET role=?, updated_at=NOW() WHERE id=?");
-        if ($stmt->execute([$newRole, $userId])) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'User role updated successfully'
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Error updating user role']);
-        }
-        break;
-
-    default:
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Invalid action']);
-        break;
+    } catch (Exception $e) {
+        jsonResponse(['success' => false, 'message' => 'Error creating user: ' . $e->getMessage()], 500);
+    }
 }
 ?>

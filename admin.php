@@ -153,7 +153,7 @@ try {
 // Get recent users
 $recentUsers = [];
 try {
-    $stmt = $db->query("SELECT id, name, email, created_at, is_active FROM users ORDER BY created_at DESC LIMIT 5");
+    $stmt = $db->query("SELECT id, name, email, role, created_at, is_active FROM users ORDER BY created_at DESC LIMIT 5");
     $recentUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $message = "Error loading recent users: " . $e->getMessage();
@@ -179,7 +179,7 @@ try {
 
         .admin-container {
             padding: 3rem 0;
-            background-color: var(--White);
+            background-color: var(--white);
         }
 
         .admin-grid {
@@ -372,6 +372,123 @@ try {
             color: #ff7675;
             border: 1px solid #ff7675;
         }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .admin-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-header {
+                padding: 2rem 0;
+            }
+
+            .admin-container {
+                padding: 2rem 0;
+            }
+
+            .admin-card {
+                padding: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 1.5rem 0;
+            }
+
+            .admin-container {
+                padding: 1.5rem 0;
+            }
+
+            .admin-card h3 {
+                font-size: 1.2rem;
+            }
+
+            .data-table {
+                font-size: 0.9rem;
+            }
+
+            .data-table th, .data-table td {
+                padding: 0.7rem;
+            }
+
+            .user-actions {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+
+            .action-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 15% auto;
+                padding: 1.5rem;
+            }
+
+            .control-group input, .control-group select, .control-group textarea {
+                padding: 0.6rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .admin-header {
+                padding: 1rem 0;
+            }
+
+            .admin-container {
+                padding: 1rem 0;
+            }
+
+            .admin-card {
+                padding: 1rem;
+            }
+
+            .admin-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .stat-number {
+                font-size: 1.8rem;
+            }
+
+            .data-table {
+                font-size: 0.8rem;
+            }
+
+            .data-table th, .data-table td {
+                padding: 0.5rem;
+            }
+
+            .health-item {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 20% auto;
+                padding: 1rem;
+            }
+
+            .modal-content h3 {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -381,7 +498,7 @@ try {
             <ul class="nav-links">
                 <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="admin.php" class="active">Admin Panel</a></li>
-                <li><a href="profile.php">Profile</a></li>
+                <li><a href="profile.html">Profile</a></li>
                 <li><a href="logout.php" class="btn-login">Log Out</a></li>
             </ul>
             <div class="menu-btn">
@@ -457,9 +574,9 @@ try {
                             <td><?php echo htmlspecialchars($user['email']); ?></td>
                             <td>
                                 <select onchange="updateUserRole(<?php echo $user['id']; ?>, this.value)" class="role-select">
-                                    <option value="user" <?php echo $user['role'] === 'user' ? 'selected' : ''; ?>>User</option>
-                                    <option value="moderator" <?php echo $user['role'] === 'moderator' ? 'selected' : ''; ?>>Moderator</option>
-                                    <option value="admin" <?php echo $user['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
+                                    <option value="user" <?php echo (isset($user['role']) && $user['role'] === 'user') ? 'selected' : ''; ?>>User</option>
+                                    <option value="moderator" <?php echo (isset($user['role']) && $user['role'] === 'moderator') ? 'selected' : ''; ?>>Moderator</option>
+                                    <option value="admin" <?php echo (isset($user['role']) && $user['role'] === 'admin') ? 'selected' : ''; ?>>Admin</option>
                                 </select>
                             </td>
                             <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
@@ -668,17 +785,15 @@ try {
 
             // Handle form submission for editing user
             document.getElementById('editUserForm').addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+
                 if (!currentUser) {
-                    e.preventDefault();
+                    alert('No user selected for editing');
                     return;
                 }
 
-                // Add hidden field to indicate update action
-                const updateField = document.createElement('input');
-                updateField.type = 'hidden';
-                updateField.name = 'update_user';
-                updateField.value = '1';
-                this.appendChild(updateField);
+                // Call the updateUser function
+                updateUser();
             });
         });
 
@@ -706,11 +821,7 @@ try {
                 }
             } catch (error) {
                 console.error('Error fetching user data:', error);
-                // Fallback to manual data population if API fails
-                document.getElementById('edit-user-id').value = userId;
-                document.getElementById('edit-user-name').value = 'User Name';
-                document.getElementById('edit-user-email').value = 'user@example.com';
-                document.getElementById('edit-user-status').value = '1';
+                alert('Error loading user data: ' + error.message);
             }
 
             currentUser = userId;
@@ -773,9 +884,23 @@ try {
                     const result = await response.json();
 
                     if (result.success) {
+                        // Remove the user row from the table directly
+                        const userRow = document.querySelector(`tr[data-user-id="${currentUser}"]`);
+                        if (userRow) {
+                            userRow.remove();
+                        }
+
+                        // Update the total users count
+                        const totalUsersElement = document.getElementById('total-users');
+                        if (totalUsersElement) {
+                            let currentCount = parseInt(totalUsersElement.textContent);
+                            if (!isNaN(currentCount)) {
+                                totalUsersElement.textContent = currentCount - 1;
+                            }
+                        }
+
                         alert(result.message);
                         document.getElementById('userModal').style.display = 'none';
-                        location.reload(); // Reload the page to see updated data
                     } else {
                         alert('Error: ' + result.message);
                     }
@@ -802,8 +927,22 @@ try {
                     const result = await response.json();
 
                     if (result.success) {
+                        // Remove the user row from the table directly
+                        const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+                        if (userRow) {
+                            userRow.remove();
+                        }
+
+                        // Update the total users count
+                        const totalUsersElement = document.getElementById('total-users');
+                        if (totalUsersElement) {
+                            let currentCount = parseInt(totalUsersElement.textContent);
+                            if (!isNaN(currentCount)) {
+                                totalUsersElement.textContent = currentCount - 1;
+                            }
+                        }
+
                         alert(result.message);
-                        location.reload(); // Reload the page to see updated data
                     } else {
                         alert('Error: ' + result.message);
                     }
@@ -831,39 +970,54 @@ try {
 
                     if (result.success) {
                         alert(result.message);
+                        location.reload(); // Reload to show updated role
                     } else {
                         alert('Error: ' + result.message);
-                        // Revert the selection to previous value
-                        location.reload();
+                        location.reload(); // Reload to revert the change in UI
                     }
                 } catch (error) {
                     console.error('Error updating user role:', error);
                     alert('Error updating user role: ' + error.message);
-                    // Revert the selection to previous value
-                    location.reload();
+                    location.reload(); // Reload to revert the change in UI
                 }
             } else {
-                // Revert the selection to previous value
+                // Revert the selection to previous value by reloading
                 location.reload();
             }
         }
 
         // Load all users
         async function loadUsers() {
-            alert('Loading all users...');
-            // In a real application, this would fetch all users from the API
+            try {
+                // In a real application, this would fetch all users from the API
+                // For now, we'll just reload the page to refresh the user list
+                location.reload();
+            } catch (error) {
+                console.error('Error loading users:', error);
+                alert('Error loading users: ' + error.message);
+            }
         }
 
         // Load reports
         async function loadReports() {
-            alert('Loading reports...');
-            // In a real application, this would fetch reports from the API
+            try {
+                // In a real application, this would fetch reports from the API
+                alert('Loading reports...');
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                alert('Error loading reports: ' + error.message);
+            }
         }
 
         // Load content
         async function loadContent() {
-            alert('Loading content...');
-            // In a real application, this would fetch content from the API
+            try {
+                // In a real application, this would fetch content from the API
+                alert('Loading content...');
+            } catch (error) {
+                console.error('Error loading content:', error);
+                alert('Error loading content: ' + error.message);
+            }
         }
 
         // Add new user
@@ -913,9 +1067,23 @@ try {
             }
 
             try {
-                // In a real application, this would call the API to send a broadcast
-                alert('Broadcast sent successfully!');
-                document.getElementById('broadcast-message').value = '';
+                // Send broadcast request to the API
+                const response = await fetch('backend/api/broadcasts.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=send_broadcast&message=${encodeURIComponent(message)}`
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    document.getElementById('broadcast-message').value = '';
+                } else {
+                    alert('Error: ' + result.message);
+                }
             } catch (error) {
                 console.error('Error sending broadcast:', error);
                 alert('Error sending broadcast: ' + error.message);
@@ -923,15 +1091,30 @@ try {
         }
 
         // Toggle maintenance mode
-        function toggleMaintenanceMode() {
+        async function toggleMaintenanceMode() {
             const mode = document.getElementById('maintenance-mode').value;
-            alert('Maintenance mode ' + (mode === 'on' ? 'enabled' : 'disabled'));
+
+            try {
+                // In a real application, this would call the API to set maintenance mode
+                // For now, we'll just show a success message
+                alert('Maintenance mode ' + (mode === 'on' ? 'enabled' : 'disabled'));
+            } catch (error) {
+                console.error('Error toggling maintenance mode:', error);
+                alert('Error toggling maintenance mode: ' + error.message);
+            }
         }
 
         // Create database backup
-        function backupDatabase() {
+        async function backupDatabase() {
             if (confirm('Are you sure you want to create a database backup?')) {
-                alert('Database backup initiated...');
+                try {
+                    // In a real application, this would call the API to initiate backup
+                    // For now, we'll just show a success message
+                    alert('Database backup initiated...');
+                } catch (error) {
+                    console.error('Error creating database backup:', error);
+                    alert('Error creating database backup: ' + error.message);
+                }
             }
         }
     </script>
