@@ -1,4 +1,10 @@
 <?php
+// Prevent multiple session starts
+if(session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include config file
 require_once 'config/config.php';
 
 header('Content-Type: application/json');
@@ -33,19 +39,35 @@ switch ($path) {
     case '':
     case 'index.php':
         // API info endpoint
-        jsonResponse([
-            'name' => 'SootheSpace API',
-            'version' => '1.0.0',
-            'description' => 'Mental health tracking API for SootheSpace application',
-            'endpoints' => [
-                'auth' => '/api/auth',
-                'mood' => '/api/mood',
-                'journal' => '/api/journal',
-                'reminders' => '/api/reminders',
-                'insights' => '/api/insights'
-            ],
-            'methods' => ['GET', 'POST', 'PUT', 'DELETE']
-        ]);
+        if(function_exists('jsonResponse')) {
+            jsonResponse([
+                'name' => 'SootheSpace API',
+                'version' => '1.0.0',
+                'description' => 'Mental health tracking API for SootheSpace application',
+                'endpoints' => [
+                    'auth' => '/api/auth',
+                    'mood' => '/api/mood',
+                    'journal' => '/api/journal',
+                    'reminders' => '/api/reminders',
+                    'insights' => '/api/insights'
+                ],
+                'methods' => ['GET', 'POST', 'PUT', 'DELETE']
+            ]);
+        } else {
+            echo json_encode([
+                'name' => 'SootheSpace API',
+                'version' => '1.0.0',
+                'description' => 'Mental health tracking API for SootheSpace application',
+                'endpoints' => [
+                    'auth' => '/api/auth',
+                    'mood' => '/api/mood',
+                    'journal' => '/api/journal',
+                    'reminders' => '/api/reminders',
+                    'insights' => '/api/insights'
+                ],
+                'methods' => ['GET', 'POST', 'PUT', 'DELETE']
+            ]);
+        }
         break;
     default:
         http_response_code(404);

@@ -1,7 +1,8 @@
 // API Service for SootheSpace
 class ApiService {
     constructor() {
-        this.baseUrl = 'http://localhost/Mental-health-system/backend';
+        // Use relative path to avoid CORS issues during development
+        this.baseUrl = '/Mental-health-system/backend';
         this.token = localStorage.getItem('token') || sessionStorage.getItem('token');
     }
 
