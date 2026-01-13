@@ -132,10 +132,6 @@
                             <input type="hidden" id="age-group" required>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="why-join"><i class="fas fa-heart"></i> Why do you want to join SootheSpace?</label>
-                            <textarea id="why-join" class="form-control" rows="3" placeholder="Share what brings you here today..."></textarea>
-                        </div>
                         
                         <div class="form-group">
                             <label><i class="fas fa-bullseye"></i> What are your main wellness goals?</label>
@@ -246,6 +242,12 @@
     <script src="js/api.js"></script>
     <script src="js/script.js"></script>
     <script>
+        // Define validation function if not available
+        function isValidEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Step navigation
             const steps = document.querySelectorAll('.step');
@@ -294,7 +296,7 @@
                     return;
                 }
 
-                if (!window.isValidEmail(email)) {
+                if (!isValidEmail(email)) {
                     alert('Please enter a valid email address.');
                     return;
                 }
