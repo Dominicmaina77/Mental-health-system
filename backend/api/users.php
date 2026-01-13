@@ -147,7 +147,51 @@ switch ($action) {
             'offset' => $offset
         ]);
         break;
-        
+
+    case 'add_user':
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (!$name || !$email || !$password) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Name, email, and password are required']);
+            exit;
+        }
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid email format']);
+            exit;
+        }
+
+        // Check if user already exists
+        if ($userModel->findByEmail($email)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'User with this email already exists']);
+            exit;
+        }
+
+        // Create new user
+        $userModel->name = $name;
+        $userModel->email = $email;
+        $userModel->password_hash = password_hash($password, PASSWORD_DEFAULT);
+        $userModel->age_group = null; // Default value
+
+        $userId = $userModel->create();
+        if ($userId) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'User created successfully',
+                'user_id' => $userId
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error creating user']);
+        }
+        break;
+
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
