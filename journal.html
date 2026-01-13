@@ -223,15 +223,17 @@
         </div>
     </footer>
 
+    <script src="js/api.js"></script>
+    <script src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const tagOptions = document.querySelectorAll('.tag-option');
             const selectedTags = [];
-            
+
             tagOptions.forEach(tag => {
                 tag.addEventListener('click', function() {
                     const tagValue = this.getAttribute('data-tag');
-                    
+
                     if (this.classList.contains('selected')) {
                         this.classList.remove('selected');
                         const index = selectedTags.indexOf(tagValue);
@@ -242,33 +244,123 @@
                     }
                 });
             });
-            
-            document.getElementById('save-entry').addEventListener('click', function() {
+
+            document.getElementById('save-entry').addEventListener('click', async function() {
                 const title = document.getElementById('entry-title').value.trim();
                 const content = document.getElementById('entry-content').value.trim();
-                
+
                 if (!content) {
                     alert('Please write something in your journal entry.');
                     return;
                 }
-                
+
                 const btn = this;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                 btn.disabled = true;
-                
-                setTimeout(() => {
-                    alert('Entry saved successfully! ✨');
-                    
-                    // Clear form
-                    document.getElementById('entry-title').value = '';
-                    document.getElementById('entry-content').value = '';
-                    tagOptions.forEach(tag => tag.classList.remove('selected'));
-                    selectedTags.length = 0;
-                    
+
+                try {
+                    // Prepare journal data
+                    const journalData = {
+                        title: title || null,
+                        content: content,
+                        tags: selectedTags
+                    };
+
+                    // Save journal entry to API
+                    const response = await apiService.createJournalEntry(journalData);
+
+                    if (response && response.id) {
+                        alert('Entry saved successfully! ✨');
+
+                        // Clear form
+                        document.getElementById('entry-title').value = '';
+                        document.getElementById('entry-content').value = '';
+                        tagOptions.forEach(tag => tag.classList.remove('selected'));
+                        selectedTags.length = 0;
+
+                        // Reload entries to show the new one
+                        loadJournalEntries();
+                        loadJournalStats();
+                    } else {
+                        alert(response.error || 'Failed to save entry. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving journal entry:', error);
+                    alert(error.message || 'An error occurred while saving your entry. Please try again.');
+                } finally {
                     btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
                     btn.disabled = false;
-                }, 1000);
+                }
             });
+
+            // Load journal entries from API
+            async function loadJournalEntries() {
+                try {
+                    const response = await apiService.getJournalEntries(1, 10); // Get first 10 entries
+                    if (response && response.journal_entries) {
+                        const entriesContainer = document.querySelector('.journal-entries');
+                        entriesContainer.innerHTML = ''; // Clear existing entries
+
+                        response.journal_entries.forEach(entry => {
+                            const entryElement = document.createElement('div');
+                            entryElement.className = 'journal-entry';
+
+                            // Format date
+                            const date = new Date(entry.created_at);
+                            const formattedDate = date.toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+                            entryElement.innerHTML = `
+                                <div class="entry-header">
+                                    <strong>${entry.title || 'Untitled Entry'}</strong>
+                                    <span style="font-size: 0.9rem; color: var(--text-light);">${formattedDate}</span>
+                                </div>
+                                <p>${entry.content.substring(0, 150)}${entry.content.length > 150 ? '...' : ''}</p>
+                                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                    ${selectedTags.length > 0 ?
+                                        selectedTags.map(tag =>
+                                            `<span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${tag}</span>`
+                                        ).join('') : ''}
+                                </div>
+                            `;
+
+                            entriesContainer.appendChild(entryElement);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading journal entries:', error);
+                }
+            }
+
+            // Load journal statistics from API
+            async function loadJournalStats() {
+                try {
+                    // We'll need to enhance the API to provide journal stats
+                    // For now, we'll just update the entries count based on the loaded entries
+                    const response = await apiService.getJournalEntries(1, 100); // Get up to 100 entries
+                    if (response && response.journal_entries) {
+                        const totalEntries = response.journal_entries.length;
+                        const thisMonth = response.journal_entries.filter(entry => {
+                            const entryDate = new Date(entry.created_at);
+                            const now = new Date();
+                            return entryDate.getMonth() === now.getMonth() &&
+                                   entryDate.getFullYear() === now.getFullYear();
+                        }).length;
+
+                        // Update stats in the UI
+                        document.querySelector('.stats-grid div:nth-child(1) div:first-child').textContent = totalEntries;
+                        document.querySelector('.stats-grid div:nth-child(2) div:first-child').textContent = thisMonth;
+                    }
+                } catch (error) {
+                    console.error('Error loading journal stats:', error);
+                }
+            }
+
+            // Initialize data
+            loadJournalEntries();
+            loadJournalStats();
         });
     </script>
 </body>
