@@ -343,32 +343,68 @@
                 
                 <!-- Recent Moods -->
                 <div class="recent-moods">
-                    <h2>Your Recent Moods 📅</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2>Your Recent Moods 📅</h2>
+                        <div class="history-controls">
+                            <select id="history-period" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue); background: var(--white);">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30" selected>Last 30 Days</option>
+                                <option value="90">Last 3 Months</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                    </div>
                     <p>Track your emotional journey over time</p>
-                    
+
                     <div class="mood-history">
-                        <div class="mood-day">
-                            <div class="mood-day-emoji">😊</div>
-                            <div class="mood-day-date">Today</div>
-                            <div class="mood-day-value">7/10 - Good</div>
+                        <!-- Mood entries will be populated by JavaScript -->
+                        <div class="loading-moods" style="text-align: center; padding: 2rem; color: var(--text-light);">
+                            <i class="fas fa-spinner fa-spin"></i> Loading your mood history...
                         </div>
-                        
-                        <div class="mood-day">
-                            <div class="mood-day-emoji">🙂</div>
-                            <div class="mood-day-date">Yesterday</div>
-                            <div class="mood-day-value">6/10 - Okay</div>
+                    </div>
+
+                    <div class="view-more" style="text-align: center; margin-top: 1rem;">
+                        <button id="view-full-history" class="btn-secondary" style="padding: 0.8rem 1.5rem; border-radius: 8px;">
+                            View Full History <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Full Mood History Modal -->
+                <div id="historyModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+                    <div class="modal-content" style="background-color: var(--white); margin: 2% auto; padding: 2rem; border-radius: var(--radius); width: 90%; max-width: 900px; position: relative; max-height: 90vh; overflow-y: auto;">
+                        <span class="close" onclick="document.getElementById('historyModal').style.display='none'" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+                        <h2 style="color: var(--dark-blue); margin-top: 0;">Full Mood History 📊</h2>
+
+                        <div class="history-filters" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                            <div>
+                                <label for="start-date">Start Date:</label>
+                                <input type="date" id="start-date" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue);">
+                            </div>
+                            <div>
+                                <label for="end-date">End Date:</label>
+                                <input type="date" id="end-date" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue);">
+                            </div>
+                            <div>
+                                <label for="min-mood">Min Mood:</label>
+                                <select id="min-mood" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue);">
+                                    <option value="1">1 - Very Low</option>
+                                    <option value="2">2 - Low</option>
+                                    <option value="3">3 - Somewhat Low</option>
+                                    <option value="4">4 - A Bit Low</option>
+                                    <option value="5">5 - Neutral</option>
+                                    <option value="6">6 - Okay</option>
+                                    <option value="7" selected>7 - Good</option>
+                                    <option value="8">8 - Very Good</option>
+                                    <option value="9">9 - Great</option>
+                                    <option value="10">10 - Excellent</option>
+                                </select>
+                            </div>
+                            <button id="apply-filters" class="btn-primary" style="align-self: flex-end; padding: 0.6rem 1rem;">Apply Filters</button>
                         </div>
-                        
-                        <div class="mood-day">
-                            <div class="mood-day-emoji">😐</div>
-                            <div class="mood-day-date">Nov 12</div>
-                            <div class="mood-day-value">5/10 - Neutral</div>
-                        </div>
-                        
-                        <div class="mood-day">
-                            <div class="mood-day-emoji">😊</div>
-                            <div class="mood-day-date">Nov 11</div>
-                            <div class="mood-day-value">8/10 - Very Good</div>
+
+                        <div id="full-history-list">
+                            <!-- Full history will be populated by JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -667,6 +703,21 @@
             loadRecentMoods();
             loadStreak();
 
+            // Add event listeners for history controls
+            document.getElementById('history-period').addEventListener('change', function() {
+                const period = this.value;
+                loadRecentMoods(period);
+            });
+
+            document.getElementById('view-full-history').addEventListener('click', function() {
+                document.getElementById('historyModal').style.display = 'block';
+                loadFullHistory();
+            });
+
+            document.getElementById('apply-filters').addEventListener('click', function() {
+                loadFullHistory();
+            });
+
             function getMoodLabel(value) {
                 const labels = {
                     1: 'Very Low',
@@ -689,6 +740,189 @@
                 if (value <= 6) return '😐';
                 if (value <= 8) return '🙂';
                 return '😊';
+            }
+
+            // Load recent moods with period filter
+            async function loadRecentMoods(period = 30) {
+                try {
+                    const response = await apiService.getMoodEntries(4); // Get last 4 entries
+                    if (response && response.mood_entries) {
+                        const moodHistory = document.querySelector('.mood-history');
+                        if (moodHistory) {
+                            moodHistory.innerHTML = ''; // Clear existing entries
+
+                            if (response.mood_entries.length === 0) {
+                                moodHistory.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light);">No mood entries yet. Start tracking your mood!</div>';
+                                return;
+                            }
+
+                            response.mood_entries.forEach(entry => {
+                                const moodDay = document.createElement('div');
+                                moodDay.className = 'mood-day';
+
+                                // Determine emoji based on mood value
+                                const moodEmoji = getMoodEmoji(entry.mood_value);
+
+                                // Format date
+                                const date = new Date(entry.date_recorded);
+                                const formattedDate = date.toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
+
+                                moodDay.innerHTML = `
+                                    <div class="mood-day-emoji">${moodEmoji}</div>
+                                    <div class="mood-day-date">${formattedDate}</div>
+                                    <div class="mood-day-value">${entry.mood_value}/10 - ${getMoodLabel(entry.mood_value)}</div>
+                                `;
+
+                                moodHistory.appendChild(moodDay);
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading recent moods:', error);
+
+                    // Show error message to user
+                    const moodHistory = document.querySelector('.mood-history');
+                    if (moodHistory) {
+                        moodHistory.innerHTML = `<div class="form-message error" style="margin-top: 1rem;">
+                            ⚠️ Failed to load recent moods. Please refresh the page.
+                        </div>`;
+                    }
+                }
+            }
+
+            // Load full mood history
+            async function loadFullHistory() {
+                try {
+                    // Get filter values
+                    const startDate = document.getElementById('start-date').value;
+                    const endDate = document.getElementById('end-date').value;
+                    const minMood = document.getElementById('min-mood').value;
+
+                    let apiUrl = '/api/mood';
+                    const params = [];
+
+                    if (startDate && endDate) {
+                        params.push(`start_date=${startDate}`, `end_date=${endDate}`);
+                    } else {
+                        // Default to last 90 days if no dates specified
+                        const today = new Date();
+                        const ninetyDaysAgo = new Date(today);
+                        ninetyDaysAgo.setDate(today.getDate() - 90);
+
+                        const formatDate = (date) => date.toISOString().split('T')[0];
+                        params.push(`start_date=${formatDate(ninetyDaysAgo)}`, `end_date=${formatDate(today)}`);
+                    }
+
+                    // Add min mood filter
+                    if (minMood && minMood > 1) {
+                        params.push(`min_mood=${minMood}`);
+                    }
+
+                    if (params.length > 0) {
+                        apiUrl += '?' + params.join('&');
+                    }
+
+                    // Use the appropriate API method based on filters
+                    let response;
+                    if (startDate && endDate) {
+                        response = await apiService.getMoodEntriesByDateRange(startDate, endDate);
+                    } else {
+                        // Default to getting last 90 days of entries
+                        const today = new Date();
+                        const ninetyDaysAgo = new Date(today);
+                        ninetyDaysAgo.setDate(today.getDate() - 90);
+
+                        const formatDate = (date) => date.toISOString().split('T')[0];
+                        response = await apiService.getMoodEntriesByDateRange(formatDate(ninetyDaysAgo), formatDate(today));
+                    }
+
+                    // Apply min mood filter client-side if needed
+                    if (response && response.mood_entries && minMood && minMood > 1) {
+                        response.mood_entries = response.mood_entries.filter(entry => entry.mood_value >= parseInt(minMood));
+                    }
+
+                    if (response && response.mood_entries) {
+                        const historyList = document.getElementById('full-history-list');
+                        if (historyList) {
+                            historyList.innerHTML = ''; // Clear existing entries
+
+                            if (response.mood_entries.length === 0) {
+                                historyList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-light);">No mood entries match your filters.</div>';
+                                return;
+                            }
+
+                            // Sort by date descending
+                            response.mood_entries.sort((a, b) => new Date(b.date_recorded) - new Date(a.date_recorded));
+
+                            // Group by month for better organization
+                            const groupedEntries = {};
+                            response.mood_entries.forEach(entry => {
+                                const date = new Date(entry.date_recorded);
+                                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+                                if (!groupedEntries[monthKey]) {
+                                    groupedEntries[monthKey] = [];
+                                }
+                                groupedEntries[monthKey].push(entry);
+                            });
+
+                            // Create sections for each month
+                            Object.keys(groupedEntries).sort().reverse().forEach(monthKey => {
+                                const monthEntries = groupedEntries[monthKey];
+                                const monthDate = new Date(monthKey + '-01');
+                                const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+                                const monthSection = document.createElement('div');
+                                monthSection.className = 'month-section';
+                                monthSection.innerHTML = `<h3 style="color: var(--dark-blue); border-bottom: 2px solid var(--pastel-blue); padding-bottom: 0.5rem; margin-top: 1.5rem;">${monthName}</h3>`;
+
+                                const monthGrid = document.createElement('div');
+                                monthGrid.style.display = 'grid';
+                                monthGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))';
+                                monthGrid.style.gap = '1rem';
+                                monthGrid.style.marginTop = '1rem';
+
+                                monthEntries.forEach(entry => {
+                                    const entryCard = document.createElement('div');
+                                    entryCard.style.backgroundColor = 'var(--light-blue)';
+                                    entryCard.style.borderRadius = '8px';
+                                    entryCard.style.padding = '1rem';
+                                    entryCard.style.textAlign = 'center';
+                                    entryCard.style.boxShadow = '0 2px 5px var(--shadow)';
+
+                                    const date = new Date(entry.date_recorded);
+                                    const day = date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+
+                                    entryCard.innerHTML = `
+                                        <div style="font-size: 2rem;">${getMoodEmoji(entry.mood_value)}</div>
+                                        <div style="font-weight: 600; margin: 0.5rem 0;">${day}</div>
+                                        <div style="color: var(--dark-blue); font-weight: 700;">${entry.mood_value}/10</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.3rem;">${getMoodLabel(entry.mood_value)}</div>
+                                        ${entry.mood_note ? `<div style="font-size: 0.8rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--pastel-blue);">${entry.mood_note}</div>` : ''}
+                                    `;
+
+                                    monthGrid.appendChild(entryCard);
+                                });
+
+                                monthSection.appendChild(monthGrid);
+                                historyList.appendChild(monthSection);
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading full history:', error);
+
+                    const historyList = document.getElementById('full-history-list');
+                    if (historyList) {
+                        historyList.innerHTML = `<div class="form-message error" style="margin-top: 1rem;">
+                            ⚠️ Failed to load mood history. Please try again.
+                        </div>`;
+                    }
+                }
             }
         });
     </script>
