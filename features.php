@@ -364,7 +364,7 @@ $userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
         <div class="container">
             <h2>Ready to Start Your Wellness Journey? 🚀</h2>
             <p>Experience all these features in a safe, supportive environment designed just for you.</p>
-            <a href="signup.html" class="btn-primary">Get Started for Free</a>
+            <a href="signup.php" class="btn-primary">Get Started for Free</a>
         </div>
     </section>
 

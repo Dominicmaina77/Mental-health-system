@@ -260,7 +260,7 @@
                 <li><a href="insights.html">Insights</a></li>
                 <li><a href="reminders.html">Reminders</a></li>
                 <li><a href="profile.html">Profile</a></li>
-                <li><a href="login.html" class="btn-login">Log Out</a></li>
+                <li><a href="logout.php" class="btn-login">Log Out</a></li>
             </ul>
             <div class="menu-btn">
                 <i class="fas fa-bars"></i>
@@ -432,6 +432,21 @@
     <script src="js/script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
+            // Check if user is authenticated
+            try {
+                const authStatus = await apiService.getAuthStatus();
+                if (!authStatus || !authStatus.authenticated) {
+                    // Redirect to login if not authenticated
+                    window.location.href = 'login.php';
+                    return;
+                }
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                // Redirect to login if auth check fails
+                window.location.href = 'login.php';
+                return;
+            }
+
             const moodEmojis = document.querySelectorAll('.mood-emoji');
             const moodSlider = document.getElementById('mood-slider');
             let selectedMood = 7;
@@ -440,7 +455,9 @@
             // Update slider color based on value
             function updateSliderColor(value) {
                 const percent = ((value - 1) / 9) * 100;
-                moodSlider.style.background = `linear-gradient(to right, #ff7675 0%, #fdcb6e 50%, #00b894 100%)`;
+                // Adjust gradient based on value
+                const hue = 120 - (value - 1) * 12; // From red (hue ~0) to green (hue ~120)
+                moodSlider.style.background = `linear-gradient(to right, hsl(${hue}, 100%, 50%), hsl(${hue + 20}, 100%, 50%))`;
             }
 
             // Initialize slider color
@@ -514,7 +531,19 @@
                     const response = await apiService.createMoodEntry(moodData);
 
                     if (response && response.id) {
-                        alert(`Mood saved: ${selectedEmoji} (${selectedMood}/10)`);
+                        // Show success message
+                        const successMessage = document.createElement('div');
+                        successMessage.className = 'form-message success';
+                        successMessage.style.marginTop = '1rem';
+                        successMessage.innerHTML = `✅ Mood saved: ${selectedEmoji} (${selectedMood}/10)`;
+
+                        // Insert after the save button
+                        saveBtn.parentNode.insertBefore(successMessage, saveBtn.nextSibling);
+
+                        // Remove message after 3 seconds
+                        setTimeout(() => {
+                            successMessage.remove();
+                        }, 3000);
 
                         // Reset form
                         document.getElementById('mood-note').value = '';
@@ -527,7 +556,9 @@
                             const streakResponse = await apiService.getMoodStreak();
                             if (streakResponse && streakResponse.streak !== undefined) {
                                 const streakNumber = document.querySelector('.streak-number');
-                                streakNumber.textContent = streakResponse.streak;
+                                if (streakNumber) {
+                                    streakNumber.textContent = streakResponse.streak;
+                                }
                             }
                         } catch (error) {
                             console.error('Error fetching streak:', error);
@@ -535,22 +566,24 @@
 
                         // Add to recent moods
                         const moodHistory = document.querySelector('.mood-history');
-                        const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                        if (moodHistory) {
+                            const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
-                        const newMoodDay = document.createElement('div');
-                        newMoodDay.className = 'mood-day';
-                        newMoodDay.innerHTML = `
-                            <div class="mood-day-emoji">${selectedEmoji}</div>
-                            <div class="mood-day-date">Today</div>
-                            <div class="mood-day-value">${selectedMood}/10 - ${getMoodLabel(selectedMood)}</div>
-                        `;
+                            const newMoodDay = document.createElement('div');
+                            newMoodDay.className = 'mood-day';
+                            newMoodDay.innerHTML = `
+                                <div class="mood-day-emoji">${selectedEmoji}</div>
+                                <div class="mood-day-date">Today</div>
+                                <div class="mood-day-value">${selectedMood}/10 - ${getMoodLabel(selectedMood)}</div>
+                            `;
 
-                        // Add to beginning
-                        moodHistory.insertBefore(newMoodDay, moodHistory.firstChild);
+                            // Add to beginning
+                            moodHistory.insertBefore(newMoodDay, moodHistory.firstChild);
 
-                        // Limit to 4 items
-                        if (moodHistory.children.length > 4) {
-                            moodHistory.removeChild(moodHistory.lastChild);
+                            // Limit to 4 items
+                            if (moodHistory.children.length > 4) {
+                                moodHistory.removeChild(moodHistory.lastChild);
+                            }
                         }
                     } else {
                         alert(response.error || 'Failed to save mood. Please try again.');
@@ -571,34 +604,47 @@
                     const response = await apiService.getMoodEntries(4); // Get last 4 entries
                     if (response && response.mood_entries) {
                         const moodHistory = document.querySelector('.mood-history');
-                        moodHistory.innerHTML = ''; // Clear existing entries
+                        if (moodHistory) {
+                            moodHistory.innerHTML = ''; // Clear existing entries
 
-                        response.mood_entries.forEach(entry => {
-                            const moodDay = document.createElement('div');
-                            moodDay.className = 'mood-day';
+                            response.mood_entries.forEach(entry => {
+                                const moodDay = document.createElement('div');
+                                moodDay.className = 'mood-day';
 
-                            // Determine emoji based on mood value
-                            const moodEmoji = getMoodEmoji(entry.mood_value);
+                                // Determine emoji based on mood value
+                                const moodEmoji = getMoodEmoji(entry.mood_value);
 
-                            // Format date
-                            const date = new Date(entry.date_recorded);
-                            const formattedDate = date.toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric'
+                                // Format date
+                                const date = new Date(entry.date_recorded);
+                                const formattedDate = date.toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
+
+                                moodDay.innerHTML = `
+                                    <div class="mood-day-emoji">${moodEmoji}</div>
+                                    <div class="mood-day-date">${formattedDate}</div>
+                                    <div class="mood-day-value">${entry.mood_value}/10 - ${getMoodLabel(entry.mood_value)}</div>
+                                `;
+
+                                moodHistory.appendChild(moodDay);
                             });
-
-                            moodDay.innerHTML = `
-                                <div class="mood-day-emoji">${moodEmoji}</div>
-                                <div class="mood-day-date">${formattedDate}</div>
-                                <div class="mood-day-value">${entry.mood_value}/10 - ${getMoodLabel(entry.mood_value)}</div>
-                            `;
-
-                            moodHistory.appendChild(moodDay);
-                        });
+                        }
                     }
                 } catch (error) {
                     console.error('Error loading recent moods:', error);
+
+                    // Show error message to user
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'form-message error';
+                    errorMessage.style.marginTop = '1rem';
+                    errorMessage.innerHTML = '⚠️ Failed to load recent moods. Please refresh the page.';
+
+                    const moodSelector = document.querySelector('.mood-selector');
+                    if (moodSelector) {
+                        moodSelector.appendChild(errorMessage);
+                    }
                 }
             }
 
@@ -608,7 +654,9 @@
                     const response = await apiService.getMoodStreak();
                     if (response && response.streak !== undefined) {
                         const streakNumber = document.querySelector('.streak-number');
-                        streakNumber.textContent = response.streak;
+                        if (streakNumber) {
+                            streakNumber.textContent = response.streak;
+                        }
                     }
                 } catch (error) {
                     console.error('Error loading streak:', error);

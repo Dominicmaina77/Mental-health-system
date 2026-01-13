@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <p>Sign in to continue your wellness journey</p>
                 </div>
 
-                <form id="login-form" method="POST" action="login.html">
+                <form id="login-form" method="POST" action="login.php">
                     <?php if (isset($error)): ?>
                         <div class="form-message error"><?php echo htmlspecialchars($error); ?></div>
                     <?php endif; ?>
@@ -148,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="register-link">
-                    <p>New to SootheSpace? <a href="signup.html">Create an account</a></p>
+                    <p>New to SootheSpace? <a href="register_test.php">Create an account</a></p>
                 </div>
 
                 <div class="login-quote">

@@ -260,7 +260,7 @@ $userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
                         <a href="dashboard.php" class="btn-primary">Go to Dashboard 🎯</a>
                         <a href="mood-tracker.html" class="btn-secondary">Track Mood <i class="fas fa-arrow-right"></i></a>
                     <?php else: ?>
-                        <a href="signup.php" class="btn-primary">Start Tracking Your Mood 🎯</a>
+                        <a href="register_test.php" class="btn-primary">Start Tracking Your Mood 🎯</a>
                         <a href="features.php" class="btn-secondary">Learn More <i class="fas fa-arrow-right"></i></a>
                     <?php endif; ?>
                 </div>
@@ -357,7 +357,7 @@ $userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
         <div class="container">
             <h2>Ready to Start Your Wellness Journey? 🚀</h2>
             <p>Join thousands of young people taking control of their mental health in a safe, supportive environment.</p>
-            <a href="signup.html" class="btn-primary">Create Your Free Account <i class="fas fa-user-plus"></i></a>
+            <a href="signup.php" class="btn-primary">Create Your Free Account <i class="fas fa-user-plus"></i></a>
             <p class="privacy-note"><i class="fas fa-lock"></i> Your data stays private — always. No tracking, no ads.</p>
         </div>
     </section>

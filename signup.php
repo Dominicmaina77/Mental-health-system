@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
 
                 <!-- Signup Form -->
-                <form id="signup-form" method="POST" action="signup.html">
+                <form id="signup-form" method="POST" action="signup.php">
                     <!-- Step 1: Account Information -->
                     <div id="step-1" class="form-pages active">
                         <div class="form-group">
@@ -240,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </form>
 
                 <div class="login-link">
-                    <p>Already have an account? <a href="login.html">Sign in here</a></p>
+                    <p>Already have an account? <a href="login.php">Sign in here</a></p>
                 </div>
             </div>
         </div>
