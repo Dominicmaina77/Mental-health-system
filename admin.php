@@ -40,14 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-    
+
     if (!empty($name) && !empty($email) && !empty($password)) {
         // Check if user already exists
         if (!$userModel->findByEmail($email)) {
             $userModel->name = $name;
             $userModel->email = $email;
             $userModel->password_hash = password_hash($password, PASSWORD_DEFAULT);
-            
+
             if ($userModel->create()) {
                 $message = "User created successfully!";
                 $messageType = "success";
@@ -61,6 +61,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
         }
     } else {
         $message = "Please fill in all fields.";
+        $messageType = "error";
+    }
+}
+
+// Update user
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
+    $userId = $_POST['user_id'] ?? 0;
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $isActive = $_POST['is_active'] ?? 1;
+
+    if ($userId && !empty($name) && !empty($email)) {
+        // Check if another user already has this email
+        $existingUser = new User($db);
+        if ($existingUser->findByEmail($email) && $existingUser->id != $userId) {
+            $message = "Another user already has this email address.";
+            $messageType = "error";
+        } else {
+            // Update the user
+            $stmt = $db->prepare("UPDATE users SET name=?, email=?, is_active=?, updated_at=NOW() WHERE id=?");
+            if ($stmt->execute([$name, $email, $isActive, $userId])) {
+                $message = "User updated successfully!";
+                $messageType = "success";
+            } else {
+                $message = "Error updating user.";
+                $messageType = "error";
+            }
+        }
+    } else {
+        $message = "Please fill in all fields.";
+        $messageType = "error";
+    }
+}
+
+// Delete user
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
+    $userId = $_POST['user_id'] ?? 0;
+
+    if ($userId) {
+        // Soft delete the user (set is_active to 0)
+        $stmt = $db->prepare("UPDATE users SET is_active=0, updated_at=NOW() WHERE id=?");
+        if ($stmt->execute([$userId])) {
+            $message = "User deleted successfully!";
+            $messageType = "success";
+        } else {
+            $message = "Error deleting user.";
+            $messageType = "error";
+        }
+    } else {
+        $message = "Invalid user ID.";
         $messageType = "error";
     }
 }
@@ -602,17 +652,54 @@ try {
                     }
                 }
             });
+
+            // Handle form submission for editing user
+            document.getElementById('editUserForm').addEventListener('submit', function(e) {
+                if (!currentUser) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Add hidden field to indicate update action
+                const updateField = document.createElement('input');
+                updateField.type = 'hidden';
+                updateField.name = 'update_user';
+                updateField.value = '1';
+                this.appendChild(updateField);
+            });
         });
 
         // Open edit user modal
-        function openEditUserModal(userId) {
-            // In a real application, this would fetch user data from the API
-            // For now, we'll simulate with mock data
-            document.getElementById('edit-user-id').value = userId;
-            document.getElementById('edit-user-name').value = 'User Name';
-            document.getElementById('edit-user-email').value = 'user@example.com';
-            document.getElementById('edit-user-status').value = '1';
-            
+        async function openEditUserModal(userId) {
+            try {
+                // Fetch user data from the server
+                const response = await fetch('backend/api/users.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=get_user&id=' + encodeURIComponent(userId)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('edit-user-id').value = result.user.id;
+                    document.getElementById('edit-user-name').value = result.user.name;
+                    document.getElementById('edit-user-email').value = result.user.email;
+                    document.getElementById('edit-user-status').value = result.user.is_active;
+                } else {
+                    alert('Error loading user data: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                // Fallback to manual data population if API fails
+                document.getElementById('edit-user-id').value = userId;
+                document.getElementById('edit-user-name').value = 'User Name';
+                document.getElementById('edit-user-email').value = 'user@example.com';
+                document.getElementById('edit-user-status').value = '1';
+            }
+
             currentUser = userId;
             document.getElementById('userModal').style.display = 'block';
         }
@@ -620,7 +707,7 @@ try {
         // Update user
         async function updateUser() {
             if (!currentUser) return;
-            
+
             try {
                 // In a real application, this would send a request to the API
                 alert('User updated successfully!');
@@ -635,26 +722,52 @@ try {
         // Delete user
         async function deleteUser() {
             if (!currentUser) return;
-            
+
             if (confirm('Are you sure you want to delete this user?')) {
-                try {
-                    // In a real application, this would send a request to the API
-                    alert('User deleted successfully!');
-                    document.getElementById('userModal').style.display = 'none';
-                    location.reload(); // Reload the page to see updated data
-                } catch (error) {
-                    console.error('Error deleting user:', error);
-                    alert('Error deleting user: ' + error.message);
-                }
+                // Create a form to submit the delete request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.style.display = 'none';
+
+                const userIdInput = document.createElement('input');
+                userIdInput.type = 'hidden';
+                userIdInput.name = 'user_id';
+                userIdInput.value = currentUser;
+                form.appendChild(userIdInput);
+
+                const deleteInput = document.createElement('input');
+                deleteInput.type = 'hidden';
+                deleteInput.name = 'delete_user';
+                deleteInput.value = '1';
+                form.appendChild(deleteInput);
+
+                document.body.appendChild(form);
+                form.submit();
             }
         }
 
         // Confirm delete user
         function confirmDeleteUser(userId) {
             if (confirm('Are you sure you want to delete this user?')) {
-                // In a real application, this would call the API to delete the user
-                alert('User deletion initiated!');
-                location.reload(); // Reload the page to see updated data
+                // Create a form to submit the delete request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.style.display = 'none';
+
+                const userIdInput = document.createElement('input');
+                userIdInput.type = 'hidden';
+                userIdInput.name = 'user_id';
+                userIdInput.value = userId;
+                form.appendChild(userIdInput);
+
+                const deleteInput = document.createElement('input');
+                deleteInput.type = 'hidden';
+                deleteInput.name = 'delete_user';
+                deleteInput.value = '1';
+                form.appendChild(deleteInput);
+
+                document.body.appendChild(form);
+                form.submit();
             }
         }
 
@@ -681,41 +794,41 @@ try {
             const name = document.getElementById('add-user-name').value;
             const email = document.getElementById('add-user-email').value;
             const password = document.getElementById('add-user-password').value;
-            
+
             if (!name || !email || !password) {
                 alert('Please fill in all fields');
                 return;
             }
-            
+
             // Submit the form
             const form = document.createElement('form');
             form.method = 'POST';
             form.style.display = 'none';
-            
+
             const nameInput = document.createElement('input');
             nameInput.type = 'hidden';
             nameInput.name = 'name';
             nameInput.value = name;
             form.appendChild(nameInput);
-            
+
             const emailInput = document.createElement('input');
             emailInput.type = 'hidden';
             emailInput.name = 'email';
             emailInput.value = email;
             form.appendChild(emailInput);
-            
+
             const passwordInput = document.createElement('input');
             passwordInput.type = 'hidden';
             passwordInput.name = 'password';
             passwordInput.value = password;
             form.appendChild(passwordInput);
-            
+
             const submitInput = document.createElement('input');
             submitInput.type = 'hidden';
             submitInput.name = 'add_user';
             submitInput.value = '1';
             form.appendChild(submitInput);
-            
+
             document.body.appendChild(form);
             form.submit();
         }
@@ -727,7 +840,7 @@ try {
                 alert('Please enter a message');
                 return;
             }
-            
+
             try {
                 // In a real application, this would call the API to send a broadcast
                 alert('Broadcast sent successfully!');
@@ -737,13 +850,13 @@ try {
                 alert('Error sending broadcast: ' + error.message);
             }
         }
-        
+
         // Toggle maintenance mode
         function toggleMaintenanceMode() {
             const mode = document.getElementById('maintenance-mode').value;
             alert('Maintenance mode ' + (mode === 'on' ? 'enabled' : 'disabled'));
         }
-        
+
         // Create database backup
         function backupDatabase() {
             if (confirm('Are you sure you want to create a database backup?')) {
