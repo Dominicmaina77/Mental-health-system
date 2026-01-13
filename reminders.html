@@ -218,34 +218,108 @@
         </div>
     </footer>
 
+    <script src="js/api.js"></script>
+    <script src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('save-reminder').addEventListener('click', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load reminders from API
+            async function loadReminders() {
+                try {
+                    const response = await apiService.getReminders();
+                    if (response && response.reminders) {
+                        displayReminders(response.reminders);
+                    }
+                } catch (error) {
+                    console.error('Error loading reminders:', error);
+                }
+            }
+
+            // Display reminders in the UI
+            function displayReminders(reminders) {
+                const remindersList = document.querySelector('.reminders-list');
+                const reminderItems = remindersList.querySelectorAll('.reminder-item');
+
+                // Remove existing reminder items except the header
+                reminderItems.forEach(item => item.remove());
+
+                if (reminders.length === 0) {
+                    const noReminders = document.createElement('p');
+                    noReminders.textContent = 'No reminders yet. Create your first one!';
+                    noReminders.style.textAlign = 'center';
+                    noReminders.style.color = 'var(--text-light)';
+                    noReminders.style.marginTop = '2rem';
+                    remindersList.appendChild(noReminders);
+                    return;
+                }
+
+                reminders.forEach(reminder => {
+                    const reminderItem = document.createElement('div');
+                    reminderItem.className = 'reminder-item';
+
+                    reminderItem.innerHTML = `
+                        <div class="reminder-info">
+                            <h4>${reminder.title}</h4>
+                            <p style="margin: 0.5rem 0 0; color: var(--text-light);">${reminder.description || 'No description'}</p>
+                        </div>
+                        <div class="reminder-time">${reminder.reminder_time}</div>
+                    `;
+
+                    // Insert after the header
+                    const header = remindersList.querySelector('h3');
+                    if (header) {
+                        header.parentNode.insertBefore(reminderItem, header.nextSibling);
+                    } else {
+                        remindersList.appendChild(reminderItem);
+                    }
+                });
+            }
+
+            document.getElementById('save-reminder').addEventListener('click', async function() {
                 const title = document.getElementById('reminder-title').value.trim();
                 const type = document.getElementById('reminder-type').value;
                 const time = document.getElementById('reminder-time').value;
                 const desc = document.getElementById('reminder-desc').value.trim();
-                
+
                 if (!title) {
                     alert('Please enter a reminder title.');
                     return;
                 }
-                
+
                 const btn = this;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting...';
                 btn.disabled = true;
-                
-                setTimeout(() => {
-                    alert('Reminder set successfully! 🔔');
-                    
-                    // Clear form
-                    document.getElementById('reminder-title').value = '';
-                    document.getElementById('reminder-desc').value = '';
-                    
+
+                try {
+                    const response = await apiService.createReminder({
+                        title: title,
+                        description: desc || null,
+                        reminder_time: time,
+                        reminder_type: type
+                    });
+
+                    if (response && response.id) {
+                        alert('Reminder set successfully! 🔔');
+
+                        // Clear form
+                        document.getElementById('reminder-title').value = '';
+                        document.getElementById('reminder-desc').value = '';
+
+                        // Reload reminders to show the new one
+                        loadReminders();
+                    } else {
+                        alert(response.error || 'Failed to set reminder. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error creating reminder:', error);
+                    alert(error.message || 'An error occurred while setting your reminder. Please try again.');
+                } finally {
                     btn.innerHTML = '<i class="fas fa-bell"></i> Set Reminder';
                     btn.disabled = false;
-                }, 1000);
+                }
             });
+
+            // Initialize reminders
+            loadReminders();
         });
     </script>
 </body>
