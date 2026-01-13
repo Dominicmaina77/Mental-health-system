@@ -36,12 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } else {
                         // Login successful
                         $token = login($user->id, $user->email, $user->name);
-                        
+
                         // Set remember me if checked
                         if ($remember) {
                             setcookie('user_token', $token, time() + (86400 * 30), "/"); // 30 days
                         }
-                        
+
                         // Redirect to dashboard
                         header('Location: dashboard.php');
                         exit();

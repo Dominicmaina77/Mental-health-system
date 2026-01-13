@@ -57,6 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Set role - regular user by default
                 $user->role = 'user';
 
+                // Check if admin creation is requested with proper secret
+                $adminSecret = $_POST['admin_secret'] ?? '';
+                if ($adminSecret === 'make_me_admin') { // This should be a strong secret in production
+                    $user->role = 'admin';
+                }
+
                 $userId = $user->create();
                 
                 if ($userId) {
@@ -311,6 +317,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setupPasswordToggle(document.getElementById('togglePassword1'), 'password');
             setupPasswordToggle(document.getElementById('togglePassword2'), 'confirm-password');
         });
+
+        function toggleAdminField() {
+            const adminField = document.getElementById('admin-secret-field');
+            if (adminField.style.display === 'none') {
+                adminField.style.display = 'block';
+            } else {
+                adminField.style.display = 'none';
+            }
+        }
     </script>
 </body>
 </html>
