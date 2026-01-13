@@ -40,7 +40,7 @@ class ApiService {
 
         try {
             const response = await fetch(url, config);
-            
+
             // Handle different response statuses
             if (response.status === 401) {
                 // Unauthorized - clear token and redirect to login
@@ -50,7 +50,7 @@ class ApiService {
             }
 
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.error || 'API request failed');
             }
@@ -58,6 +58,21 @@ class ApiService {
             return data;
         } catch (error) {
             console.error('API Error:', error);
+            throw error;
+        }
+    }
+
+    // Test API connection
+    async testConnection() {
+        try {
+            const response = await fetch(`${this.baseUrl}/`);
+            if (response.ok) {
+                return await response.json();
+            } else {
+                throw new Error(`API responded with status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('API Connection test failed:', error);
             throw error;
         }
     }
