@@ -241,30 +241,173 @@
         </div>
     </footer>
 
+    <script src="js/api.js"></script>
+    <script src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load user profile data from API
+            async function loadProfileData() {
+                try {
+                    const authResponse = await apiService.getAuthStatus();
+                    if (authResponse && authResponse.authenticated && authResponse.user) {
+                        const user = authResponse.user;
+
+                        // Update profile display
+                        document.querySelector('.profile-avatar').textContent = user.name.charAt(0).toUpperCase();
+                        document.querySelector('.profile-sidebar h3').textContent = user.name;
+                        document.querySelector('.profile-sidebar p').textContent = `Member since ${new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
+
+                        // Update form fields
+                        document.querySelector('input[placeholder="Name"]').value = user.name;
+                        document.querySelector('input[placeholder="Email"]').value = user.email;
+                    }
+                } catch (error) {
+                    console.error('Error loading profile data:', error);
+                }
+            }
+
             const themeOptions = document.querySelectorAll('.theme-option');
-            
+
             themeOptions.forEach(option => {
                 option.addEventListener('click', function() {
                     themeOptions.forEach(opt => opt.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     const theme = this.querySelector('div:last-child').textContent.toLowerCase();
                     alert(`Theme changed to ${theme} mode`);
                 });
             });
-            
-            // Delete account confirmation
-            const deleteBtn = document.querySelector('button[style*="background-color: #ff7675"]');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', function(e) {
+
+            // Save profile changes
+            const saveBtn = document.querySelector('.btn-primary');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', async function(e) {
                     e.preventDefault();
-                    if (confirm('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.')) {
-                        alert('Account deletion requested. You will receive a confirmation email.');
+
+                    const name = document.querySelector('input[placeholder="Name"]').value.trim();
+                    const email = document.querySelector('input[placeholder="Email"]').value.trim();
+
+                    if (!name) {
+                        alert('Please enter your name.');
+                        return;
+                    }
+
+                    if (!window.isValidEmail(email)) {
+                        alert('Please enter a valid email address.');
+                        return;
+                    }
+
+                    try {
+                        const response = await apiService.updateProfile({
+                            name: name
+                        });
+
+                        if (response) {
+                            alert('Profile updated successfully!');
+
+                            // Update display
+                            document.querySelector('.profile-avatar').textContent = name.charAt(0).toUpperCase();
+                            document.querySelector('.profile-sidebar h3').textContent = name;
+
+                            // Update navbar if needed
+                            const welcomeElement = document.querySelector('.welcome-section h1');
+                            if (welcomeElement) {
+                                welcomeElement.innerHTML = `Welcome back, ${name}! 🌸`;
+                            }
+                        } else {
+                            alert(response.error || 'Failed to update profile. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error updating profile:', error);
+                        alert(error.message || 'An error occurred while updating your profile. Please try again.');
                     }
                 });
             }
+
+            // Update password
+            const updatePasswordBtn = document.querySelector('button[style*="margin-top"]');
+            if (updatePasswordBtn) {
+                updatePasswordBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+
+                    const currentPassword = document.querySelector('input[placeholder="Current Password"]').value;
+                    const newPassword = document.querySelector('input[placeholder="New Password"]').value;
+                    const confirmNewPassword = document.querySelector('input[placeholder="Confirm New Password"]').value;
+
+                    if (!currentPassword || !newPassword || !confirmNewPassword) {
+                        alert('Please fill in all password fields.');
+                        return;
+                    }
+
+                    if (newPassword !== confirmNewPassword) {
+                        alert('New passwords do not match.');
+                        return;
+                    }
+
+                    if (newPassword.length < 6) {
+                        alert('New password must be at least 6 characters long.');
+                        return;
+                    }
+
+                    try {
+                        const response = await apiService.updatePassword({
+                            current_password: currentPassword,
+                            new_password: newPassword
+                        });
+
+                        if (response) {
+                            alert('Password changed successfully!');
+
+                            // Clear password fields
+                            document.querySelector('input[placeholder="Current Password"]').value = '';
+                            document.querySelector('input[placeholder="New Password"]').value = '';
+                            document.querySelector('input[placeholder="Confirm New Password"]').value = '';
+                        } else {
+                            alert(response.error || 'Failed to change password. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error changing password:', error);
+                        alert(error.message || 'An error occurred while changing your password. Please try again.');
+                    }
+                });
+            }
+
+            // Delete account confirmation
+            const deleteBtn = document.querySelector('button[style*="background-color: #ff7675"]');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.')) {
+                        const password = prompt('Please enter your password to confirm account deletion:');
+
+                        if (!password) {
+                            return;
+                        }
+
+                        try {
+                            const response = await apiService.deleteAccount({
+                                password: password
+                            });
+
+                            if (response) {
+                                alert('Account deleted successfully. Redirecting...');
+
+                                // Clear token and redirect to home
+                                apiService.removeToken();
+                                window.location.href = 'index.html';
+                            } else {
+                                alert(response.error || 'Failed to delete account. Please try again.');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting account:', error);
+                            alert(error.message || 'An error occurred while deleting your account. Please try again.');
+                        }
+                    }
+                });
+            }
+
+            // Initialize profile data
+            loadProfileData();
         });
     </script>
 </body>
