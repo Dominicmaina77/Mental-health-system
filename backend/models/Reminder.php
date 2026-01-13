@@ -1,6 +1,22 @@
 <?php
-require_once '../config/database.php';
-require_once 'functions.php'; // For getCurrentTimestamp()
+// Use absolute path to ensure proper inclusion
+$rootDir = dirname(dirname(__FILE__)); // Go up two levels to get to backend/
+$dbPath = $rootDir . '/config/database.php';
+$functionsPath = $rootDir . '/includes/functions.php';
+
+if (file_exists($dbPath)) {
+    require_once $dbPath;
+} else {
+    // Fallback: try to include from parent directory
+    require_once '../config/database.php';
+}
+
+if (file_exists($functionsPath)) {
+    require_once $functionsPath;
+} else {
+    // Fallback: try to include from parent directory
+    require_once 'functions.php';
+}
 
 class Reminder {
     private $conn;

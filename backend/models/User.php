@@ -1,5 +1,14 @@
 <?php
-require_once '../config/database.php';
+// Use absolute path to ensure proper inclusion
+$rootDir = dirname(dirname(__FILE__)); // Go up two levels to get to backend/
+$dbPath = $rootDir . '/config/database.php';
+
+if (file_exists($dbPath)) {
+    require_once $dbPath;
+} else {
+    // Fallback: try to include from parent directory
+    require_once '../config/database.php';
+}
 
 class User {
     private $conn;

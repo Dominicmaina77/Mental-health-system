@@ -7,7 +7,10 @@ if(session_status() == PHP_SESSION_NONE) {
 // Include config file
 require_once 'config/config.php';
 
-header('Content-Type: application/json');
+// Set content type header after config is loaded
+if (!headers_sent()) {
+    header('Content-Type: application/json');
+}
 
 // Simple API router
 $request = $_SERVER['REQUEST_URI'];

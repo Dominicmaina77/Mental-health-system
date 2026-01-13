@@ -1,5 +1,14 @@
 <?php
-require_once 'functions.php';
+// Use absolute path to ensure proper inclusion
+$rootDir = dirname(dirname(__FILE__)); // Go up two levels to get to backend/
+$functionsPath = $rootDir . '/includes/functions.php';
+
+if (file_exists($functionsPath)) {
+    require_once $functionsPath;
+} else {
+    // Fallback: try to include from parent directory
+    require_once 'functions.php';
+}
 
 /**
  * Require authentication for protected routes

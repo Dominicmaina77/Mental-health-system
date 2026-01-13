@@ -1,5 +1,14 @@
 <?php
-require_once '../config/config.php';
+// Use absolute path to ensure proper inclusion
+$rootDir = dirname(dirname(__FILE__)); // Go up two levels to get to backend/
+$configPath = $rootDir . '/config/config.php';
+
+if (file_exists($configPath)) {
+    require_once $configPath;
+} else {
+    // Fallback: try to include from parent directory
+    require_once '../config/config.php';
+}
 
 /**
  * Sanitize user input to prevent XSS attacks

@@ -172,16 +172,16 @@
                         <p>🌸 You're almost there! Ready to start your wellness journey?</p>
                         <div class="author">- SootheSpace Team</div>
                     </div>
-                    
+
                     <div class="privacy-notice">
                         <i class="fas fa-lock"></i> Your data stays private — always. No tracking, no ads.
                     </div>
-                    
+
                     <div class="form-navigation">
                         <button type="button" class="btn-prev" id="prev-step-3">
                             <i class="fas fa-arrow-left"></i> Back
                         </button>
-                        <button type="submit" class="signup-btn" id="complete-signup">
+                        <button type="button" class="btn-next" id="complete-signup">
                             <i class="fas fa-user-plus"></i> Create Account
                         </button>
                     </div>
@@ -428,20 +428,19 @@
 
             // Complete signup
             document.getElementById('complete-signup')?.addEventListener('click', async function() {
-                const formData = {
-                    name: document.getElementById('name').value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    password: document.getElementById('password').value,
-                    age_group: document.getElementById('age-group').value,
-                    why_join: document.getElementById('why-join').value.trim(),
-                    goals: []
-                };
+                // Collect data from all steps
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const ageGroup = document.getElementById('age-group').value;
 
+                // Collect goals
+                const goals = [];
                 document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-                    formData.goals.push(checkbox.value);
+                    goals.push(checkbox.value);
                 });
 
-                if (!formData.name || !formData.email || !formData.password || !formData.age_group) {
+                if (!name || !email || !password || !ageGroup) {
                     alert('Please complete all required fields.');
                     return;
                 }
@@ -450,7 +449,13 @@
                 this.disabled = true;
 
                 try {
-                    const response = await apiService.register(formData);
+                    const response = await apiService.register({
+                        name: name,
+                        email: email,
+                        password: password,
+                        age_group: ageGroup,
+                        goals: goals
+                    });
 
                     if (response && response.token) {
                         // Store token

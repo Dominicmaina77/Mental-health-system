@@ -1,8 +1,12 @@
 <?php
-require_once '../config/config.php';
-require_once '../includes/functions.php';
-require_once '../includes/auth.php';
-require_once '../models/User.php';
+// Define the base path for includes
+$basePath = dirname(dirname(__FILE__)); // Go up two levels to get to backend/
+
+// Include required files using absolute paths
+require_once $basePath . '/config/config.php';
+require_once $basePath . '/includes/functions.php';
+require_once $basePath . '/includes/auth.php';
+require_once $basePath . '/models/User.php';
 
 header('Content-Type: application/json');
 
@@ -21,7 +25,7 @@ if ($method === 'POST') {
                 register($db, $data);
                 break;
             case 'login':
-                login($db, $data);
+                handleLogin($db, $data);
                 break;
             case 'logout':
                 logout();
@@ -99,7 +103,7 @@ function register($db, $data) {
     if ($userId) {
         // Log the user in after registration
         $token = login($userId, $user->email, $user->name);
-        
+
         jsonResponse([
             'message' => 'User registered successfully',
             'user_id' => $userId,
@@ -112,23 +116,23 @@ function register($db, $data) {
     }
 }
 
-function login($db, $data) {
+function handleLogin($db, $data) {
     $errors = validateUserInput($data, ['email', 'password']);
-    
+
     if (!empty($errors)) {
         jsonResponse(['error' => 'Validation failed', 'details' => $errors], 400);
     }
 
     $user = new User($db);
-    
+
     if ($user->findByEmail($data['email'])) {
         if (verifyPassword($data['password'], $user->password_hash)) {
             if (!$user->is_active) {
                 jsonResponse(['error' => 'Account is deactivated'], 401);
             }
-            
-            $token = login($user->id, $user->email, $user->name);
-            
+
+            $token = \login($user->id, $user->email, $user->name);
+
             jsonResponse([
                 'message' => 'Login successful',
                 'user_id' => $user->id,

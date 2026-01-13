@@ -1,8 +1,12 @@
 <?php
-require_once '../config/config.php';
-require_once '../includes/functions.php';
-require_once '../includes/auth.php';
-require_once '../models/JournalEntry.php';
+// Define the base path for includes
+$basePath = dirname(dirname(__FILE__)); // Go up two levels to get to backend/
+
+// Include required files using absolute paths
+require_once $basePath . '/config/config.php';
+require_once $basePath . '/includes/functions.php';
+require_once $basePath . '/includes/auth.php';
+require_once $basePath . '/models/JournalEntry.php';
 
 header('Content-Type: application/json');
 
