@@ -428,55 +428,56 @@
         </div>
     </footer>
 
+    <script src="js/api.js"></script>
     <script src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const moodEmojis = document.querySelectorAll('.mood-emoji');
             const moodSlider = document.getElementById('mood-slider');
             let selectedMood = 7;
             let selectedEmoji = '🙂';
-            
+
             // Update slider color based on value
             function updateSliderColor(value) {
                 const percent = ((value - 1) / 9) * 100;
                 moodSlider.style.background = `linear-gradient(to right, #ff7675 0%, #fdcb6e 50%, #00b894 100%)`;
             }
-            
+
             // Initialize slider color
             updateSliderColor(moodSlider.value);
-            
+
             // Emoji click handler
             moodEmojis.forEach(emoji => {
                 emoji.addEventListener('click', function() {
                     moodEmojis.forEach(e => e.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     selectedMood = parseInt(this.getAttribute('data-value'));
                     selectedEmoji = this.getAttribute('data-emoji');
                     moodSlider.value = selectedMood;
                     updateSliderColor(selectedMood);
                 });
             });
-            
+
             // Slider change handler
             moodSlider.addEventListener('input', function() {
                 const value = parseInt(this.value);
                 updateSliderColor(value);
-                
+
                 // Find closest emoji
                 let closestEmoji = null;
                 let minDiff = Infinity;
-                
+
                 moodEmojis.forEach(emoji => {
                     const emojiValue = parseInt(emoji.getAttribute('data-value'));
                     const diff = Math.abs(emojiValue - value);
-                    
+
                     if (diff < minDiff) {
                         minDiff = diff;
                         closestEmoji = emoji;
                     }
                 });
-                
+
                 if (closestEmoji) {
                     moodEmojis.forEach(e => e.classList.remove('active'));
                     closestEmoji.classList.add('active');
@@ -484,63 +485,140 @@
                     selectedEmoji = closestEmoji.getAttribute('data-emoji');
                 }
             });
-            
+
             // Save mood button
-            document.getElementById('save-mood').addEventListener('click', function() {
+            document.getElementById('save-mood').addEventListener('click', async function() {
                 const note = document.getElementById('mood-note').value.trim();
                 const tags = [];
-                
+
                 document.querySelectorAll('.tag-checkbox:checked').forEach(checkbox => {
                     tags.push(checkbox.value);
                 });
-                
+
                 // Show loading state
                 const saveBtn = this;
                 const originalText = saveBtn.innerHTML;
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                 saveBtn.disabled = true;
-                
-                // Simulate save
-                setTimeout(() => {
-                    alert(`Mood saved: ${selectedEmoji} (${selectedMood}/10)`);
-                    
-                    // Reset form
-                    document.getElementById('mood-note').value = '';
-                    document.querySelectorAll('.tag-checkbox').forEach(checkbox => {
-                        checkbox.checked = false;
-                    });
-                    
-                    // Update streak
-                    const streakNumber = document.querySelector('.streak-number');
-                    const currentStreak = parseInt(streakNumber.textContent);
-                    streakNumber.textContent = currentStreak + 1;
-                    
+
+                try {
+                    // Prepare mood data
+                    const moodData = {
+                        mood_value: selectedMood,
+                        mood_note: note || null,
+                        date_recorded: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD
+                        tags: tags
+                    };
+
+                    // Save mood to API
+                    const response = await apiService.createMoodEntry(moodData);
+
+                    if (response && response.id) {
+                        alert(`Mood saved: ${selectedEmoji} (${selectedMood}/10)`);
+
+                        // Reset form
+                        document.getElementById('mood-note').value = '';
+                        document.querySelectorAll('.tag-checkbox').forEach(checkbox => {
+                            checkbox.checked = false;
+                        });
+
+                        // Update streak (we'll fetch the updated streak from API)
+                        try {
+                            const streakResponse = await apiService.getMoodStreak();
+                            if (streakResponse && streakResponse.streak !== undefined) {
+                                const streakNumber = document.querySelector('.streak-number');
+                                streakNumber.textContent = streakResponse.streak;
+                            }
+                        } catch (error) {
+                            console.error('Error fetching streak:', error);
+                        }
+
+                        // Add to recent moods
+                        const moodHistory = document.querySelector('.mood-history');
+                        const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+                        const newMoodDay = document.createElement('div');
+                        newMoodDay.className = 'mood-day';
+                        newMoodDay.innerHTML = `
+                            <div class="mood-day-emoji">${selectedEmoji}</div>
+                            <div class="mood-day-date">Today</div>
+                            <div class="mood-day-value">${selectedMood}/10 - ${getMoodLabel(selectedMood)}</div>
+                        `;
+
+                        // Add to beginning
+                        moodHistory.insertBefore(newMoodDay, moodHistory.firstChild);
+
+                        // Limit to 4 items
+                        if (moodHistory.children.length > 4) {
+                            moodHistory.removeChild(moodHistory.lastChild);
+                        }
+                    } else {
+                        alert(response.error || 'Failed to save mood. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving mood:', error);
+                    alert(error.message || 'An error occurred while saving your mood. Please try again.');
+                } finally {
                     // Reset button
                     saveBtn.innerHTML = originalText;
                     saveBtn.disabled = false;
-                    
-                    // Add to recent moods
-                    const moodHistory = document.querySelector('.mood-history');
-                    const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                    
-                    const newMoodDay = document.createElement('div');
-                    newMoodDay.className = 'mood-day';
-                    newMoodDay.innerHTML = `
-                        <div class="mood-day-emoji">${selectedEmoji}</div>
-                        <div class="mood-day-date">Today</div>
-                        <div class="mood-day-value">${selectedMood}/10 - ${getMoodLabel(selectedMood)}</div>
-                    `;
-                    
-                    // Add to beginning
-                    moodHistory.insertBefore(newMoodDay, moodHistory.firstChild);
-                    
-                    // Limit to 4 items
-                    if (moodHistory.children.length > 4) {
-                        moodHistory.removeChild(moodHistory.lastChild);
-                    }
-                }, 1000);
+                }
             });
-            
+
+            // Load recent moods from API
+            async function loadRecentMoods() {
+                try {
+                    const response = await apiService.getMoodEntries(4); // Get last 4 entries
+                    if (response && response.mood_entries) {
+                        const moodHistory = document.querySelector('.mood-history');
+                        moodHistory.innerHTML = ''; // Clear existing entries
+
+                        response.mood_entries.forEach(entry => {
+                            const moodDay = document.createElement('div');
+                            moodDay.className = 'mood-day';
+
+                            // Determine emoji based on mood value
+                            const moodEmoji = getMoodEmoji(entry.mood_value);
+
+                            // Format date
+                            const date = new Date(entry.date_recorded);
+                            const formattedDate = date.toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric'
+                            });
+
+                            moodDay.innerHTML = `
+                                <div class="mood-day-emoji">${moodEmoji}</div>
+                                <div class="mood-day-date">${formattedDate}</div>
+                                <div class="mood-day-value">${entry.mood_value}/10 - ${getMoodLabel(entry.mood_value)}</div>
+                            `;
+
+                            moodHistory.appendChild(moodDay);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error loading recent moods:', error);
+                }
+            }
+
+            // Load streak from API
+            async function loadStreak() {
+                try {
+                    const response = await apiService.getMoodStreak();
+                    if (response && response.streak !== undefined) {
+                        const streakNumber = document.querySelector('.streak-number');
+                        streakNumber.textContent = response.streak;
+                    }
+                } catch (error) {
+                    console.error('Error loading streak:', error);
+                }
+            }
+
+            // Initialize data
+            loadRecentMoods();
+            loadStreak();
+
             function getMoodLabel(value) {
                 const labels = {
                     1: 'Very Low',
@@ -555,6 +633,14 @@
                     10: 'Excellent'
                 };
                 return labels[value] || 'Neutral';
+            }
+
+            function getMoodEmoji(value) {
+                if (value <= 2) return '😢';
+                if (value <= 4) return '😞';
+                if (value <= 6) return '😐';
+                if (value <= 8) return '🙂';
+                return '😊';
             }
         });
     </script>
