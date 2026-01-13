@@ -62,7 +62,10 @@ try {
     $user->email = sanitizeInput($testData['email']);
     $user->password_hash = hashPassword($testData['password']);
     $user->age_group = isset($testData['age_group']) ? sanitizeInput($testData['age_group']) : null;
-    
+
+    // Set role - regular user by default
+    $user->role = 'user';
+
     $userId = $user->create();
     
     if ($userId) {

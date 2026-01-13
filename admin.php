@@ -7,17 +7,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// For demo purposes, we'll allow admin access if email is admin@example.com
-// In a real application, you'd have a proper role system
-$user_email = $_SESSION['user_email'] ?? '';
-$is_admin = ($user_email === 'admin@example.com'); // This is just for demonstration
-
-if (!$is_admin) {
-    // Redirect non-admin users
-    header('Location: dashboard.php');
-    exit();
-}
-
 // Include database configuration
 require_once 'backend/config/config.php';
 require_once 'backend/models/User.php';
@@ -30,6 +19,22 @@ $db = $database->getConnection();
 // Initialize models
 $userModel = new User($db);
 $moodModel = new MoodEntry($db);
+
+// Check if user has admin role
+$user_id = $_SESSION['user_id'];
+if (!$userModel->findById($user_id)) {
+    header('Location: login.php');
+    exit();
+}
+
+// Check if user has admin role
+$is_admin = ($userModel->role === 'admin' || $userModel->role === 'moderator');
+
+if (!$is_admin) {
+    // Redirect non-admin users
+    header('Location: dashboard.php');
+    exit();
+}
 
 // Handle form submissions
 $message = '';
@@ -438,6 +443,7 @@ try {
                             <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Role</th>
                             <th>Joined</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -449,6 +455,13 @@ try {
                             <td><?php echo htmlspecialchars($user['id']); ?></td>
                             <td><?php echo htmlspecialchars($user['name']); ?></td>
                             <td><?php echo htmlspecialchars($user['email']); ?></td>
+                            <td>
+                                <select onchange="updateUserRole(<?php echo $user['id']; ?>, this.value)" class="role-select">
+                                    <option value="user" <?php echo $user['role'] === 'user' ? 'selected' : ''; ?>>User</option>
+                                    <option value="moderator" <?php echo $user['role'] === 'moderator' ? 'selected' : ''; ?>>Moderator</option>
+                                    <option value="admin" <?php echo $user['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
+                                </select>
+                            </td>
                             <td><?php echo date('M j, Y', strtotime($user['created_at'])); ?></td>
                             <td>
                                 <span class="health-status <?php echo $user['is_active'] ? 'status-good' : 'status-warning'; ?>">
@@ -798,6 +811,40 @@ try {
                     console.error('Error deleting user:', error);
                     alert('Error deleting user: ' + error.message);
                 }
+            }
+        }
+
+        // Update user role
+        async function updateUserRole(userId, newRole) {
+            if (confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+                try {
+                    // Send update role request to the API
+                    const response = await fetch('backend/api/users.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `action=update_role&id=${encodeURIComponent(userId)}&role=${encodeURIComponent(newRole)}`
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert(result.message);
+                    } else {
+                        alert('Error: ' + result.message);
+                        // Revert the selection to previous value
+                        location.reload();
+                    }
+                } catch (error) {
+                    console.error('Error updating user role:', error);
+                    alert('Error updating user role: ' + error.message);
+                    // Revert the selection to previous value
+                    location.reload();
+                }
+            } else {
+                // Revert the selection to previous value
+                location.reload();
             }
         }
 

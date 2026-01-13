@@ -54,6 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user->password_hash = hashPassword($password);
                 $user->age_group = sanitizeInput($ageGroup);
 
+                // Set role - regular user by default
+                $user->role = 'user';
+
                 $userId = $user->create();
                 
                 if ($userId) {
@@ -162,11 +165,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </label>
                         </div>
 
+                        <!-- Hidden admin creation field for special access -->
+                        <div id="admin-secret-field" style="display: none;">
+                            <div class="form-group">
+                                <label for="admin_secret"><i class="fas fa-key"></i> Admin Secret Key</label>
+                                <input type="password" id="admin_secret" name="admin_secret" class="form-control" placeholder="Enter admin creation key">
+                            </div>
+                        </div>
+
                         <div class="form-navigation">
                             <div></div>
                             <button type="submit" class="btn-next">
                                 Create Account <i class="fas fa-arrow-right"></i>
                             </button>
+                        </div>
+
+                        <!-- Admin creation link for authorized personnel -->
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="#" onclick="toggleAdminField(); return false;" style="color: var(--medium-blue); text-decoration: none; font-size: 0.9rem;">
+                                Create Admin Account?
+                            </a>
                         </div>
                     </div>
 

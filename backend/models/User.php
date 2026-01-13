@@ -20,6 +20,7 @@ class User {
     public $email;
     public $password_hash;
     public $age_group;
+    public $role;
     public $created_at;
     public $updated_at;
     public $is_active;
@@ -32,9 +33,9 @@ class User {
      * Create a new user
      */
     public function create() {
-        $query = "INSERT INTO " . $this->table . " 
-                  SET name=:name, email=:email, password_hash=:password_hash, age_group=:age_group";
-        
+        $query = "INSERT INTO " . $this->table . "
+                  SET name=:name, email=:email, password_hash=:password_hash, age_group=:age_group, role=:role";
+
         $stmt = $this->conn->prepare($query);
 
         // Sanitize input
@@ -42,12 +43,14 @@ class User {
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->password_hash = htmlspecialchars(strip_tags($this->password_hash));
         $this->age_group = htmlspecialchars(strip_tags($this->age_group));
+        $this->role = htmlspecialchars(strip_tags($this->role));
 
         // Bind values
         $stmt->bindParam(':name', $this->name);
         $stmt->bindParam(':email', $this->email);
         $stmt->bindParam(':password_hash', $this->password_hash);
         $stmt->bindParam(':age_group', $this->age_group);
+        $stmt->bindParam(':role', $this->role);
 
         if($stmt->execute()) {
             return $this->conn->lastInsertId();
@@ -60,7 +63,7 @@ class User {
      */
     public function findByEmail($email) {
         $query = "SELECT * FROM " . $this->table . " WHERE email = ? LIMIT 0,1";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $email);
         $stmt->execute();
@@ -73,6 +76,7 @@ class User {
             $this->email = $row['email'];
             $this->password_hash = $row['password_hash'];
             $this->age_group = $row['age_group'];
+            $this->role = $row['role'];
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
             $this->is_active = $row['is_active'];
@@ -86,7 +90,7 @@ class User {
      */
     public function findById($id) {
         $query = "SELECT * FROM " . $this->table . " WHERE id = ? LIMIT 0,1";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $id);
         $stmt->execute();
@@ -99,6 +103,7 @@ class User {
             $this->email = $row['email'];
             $this->password_hash = $row['password_hash'];
             $this->age_group = $row['age_group'];
+            $this->role = $row['role'];
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
             $this->is_active = $row['is_active'];
@@ -201,10 +206,35 @@ class User {
     }
 
     /**
+     * Update user role
+     */
+    public function updateRole($userId, $role) {
+        $validRoles = ['user', 'admin', 'moderator'];
+        if (!in_array($role, $validRoles)) {
+            return false;
+        }
+
+        $query = "UPDATE " . $this->table . "
+                  SET role=:role, updated_at=:updated_at
+                  WHERE id=:id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(':role', $role);
+        $stmt->bindParam(':updated_at', getCurrentTimestamp());
+        $stmt->bindParam(':id', $userId);
+
+        if($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Get all users with pagination
      */
     public function getAllUsers($limit = 50, $offset = 0) {
-        $query = "SELECT id, name, email, created_at, is_active
+        $query = "SELECT id, name, email, role, created_at, is_active
                   FROM " . $this->table . "
                   ORDER BY created_at DESC
                   LIMIT :limit OFFSET :offset";

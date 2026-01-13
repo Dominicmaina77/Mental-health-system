@@ -112,6 +112,11 @@ class Database {
         INSERT IGNORE INTO mood_tags (name) VALUES
         ('school'),('stress'),('family'),('friends'),('relationship'),
         ('health'),('work'),('weather'),('gratitude'),('achievement');
+
+        -- Insert default admin user if no users exist
+        INSERT INTO users (name, email, password_hash, role, created_at)
+        SELECT 'Admin User', 'admin@example.com', '$2y$10$v3ZpqbHt27FBTtkvZcbA9uyLfxZnYK2.FtURWoMmPeHPTuTdZOD3e', 'admin', NOW()
+        WHERE NOT EXISTS (SELECT 1 FROM users);
         ";
 
         try {

@@ -15,10 +15,18 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// For demo purposes, we'll allow admin access if email is admin@example.com
-// In a real application, you'd have a proper role system
-$user_email = $_SESSION['user_email'] ?? '';
-$is_admin = ($user_email === 'admin@example.com'); // This is just for demonstration
+// Check if user has admin role
+$user_id = $_SESSION['user_id'];
+$current_user = new User($db);
+
+if (!$current_user->findById($user_id)) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
+
+// Check if user has admin role
+$is_admin = ($current_user->role === 'admin' || $current_user->role === 'moderator');
 
 if (!$is_admin) {
     http_response_code(403);
@@ -189,6 +197,35 @@ switch ($action) {
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error creating user']);
+        }
+        break;
+
+    case 'update_role':
+        $userId = $_POST['id'] ?? 0;
+        $newRole = $_POST['role'] ?? 'user';
+
+        if (!$userId) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'User ID is required']);
+            exit;
+        }
+
+        if (!in_array($newRole, ['user', 'admin', 'moderator'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid role']);
+            exit;
+        }
+
+        // Update user role
+        $stmt = $db->prepare("UPDATE users SET role=?, updated_at=NOW() WHERE id=?");
+        if ($stmt->execute([$newRole, $userId])) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'User role updated successfully'
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error updating user role']);
         }
         break;
 
