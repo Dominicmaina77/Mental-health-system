@@ -243,6 +243,7 @@
         </div>
     </footer>
 
+    <script src="js/api.js"></script>
     <script src="js/script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -250,7 +251,7 @@
             const steps = document.querySelectorAll('.step');
             const formPages = document.querySelectorAll('.form-pages');
             let currentStep = 1;
-            
+
             function updateSteps() {
                 steps.forEach(step => {
                     const stepNum = parseInt(step.getAttribute('data-step'));
@@ -260,7 +261,7 @@
                         step.classList.remove('active');
                     }
                 });
-                
+
                 formPages.forEach(page => {
                     const pageId = page.getAttribute('id');
                     if (pageId === `step-${currentStep}`) {
@@ -270,85 +271,90 @@
                     }
                 });
             }
-            
+
             // Step navigation buttons
             document.getElementById('next-step-1')?.addEventListener('click', function() {
                 const name = document.getElementById('name').value.trim();
                 const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
                 const confirmPassword = document.getElementById('confirm-password').value;
-                
+
                 if (!name || !email || !password || !confirmPassword) {
                     alert('Please fill in all required fields.');
                     return;
                 }
-                
+
                 if (password !== confirmPassword) {
                     alert('Passwords do not match.');
                     return;
                 }
-                
+
                 if (password.length < 6) {
                     alert('Password must be at least 6 characters long.');
                     return;
                 }
-                
+
+                if (!window.isValidEmail(email)) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+
                 currentStep = 2;
                 updateSteps();
             });
-            
+
             document.getElementById('next-step-2')?.addEventListener('click', function() {
                 const ageGroup = document.getElementById('age-group').value;
-                
+
                 if (!ageGroup) {
                     alert('Please select your age group.');
                     return;
                 }
-                
+
                 currentStep = 3;
                 updateSteps();
             });
-            
+
             document.getElementById('prev-step-2')?.addEventListener('click', function() {
                 currentStep = 1;
                 updateSteps();
             });
-            
+
             document.getElementById('prev-step-3')?.addEventListener('click', function() {
                 currentStep = 2;
                 updateSteps();
             });
-            
+
             // Age group selection
             document.querySelectorAll('.age-option').forEach(option => {
                 option.addEventListener('click', function() {
                     document.querySelectorAll('.age-option').forEach(opt => {
                         opt.classList.remove('selected');
                     });
-                    
+
                     this.classList.add('selected');
                     document.getElementById('age-group').value = this.getAttribute('data-age');
                 });
             });
-            
+
             // Password strength checker
             const passwordInput = document.getElementById('password');
             const strengthFill = document.getElementById('strength-fill');
             const strengthText = document.getElementById('strength-text');
-            
+
             passwordInput?.addEventListener('input', function() {
                 const password = this.value;
                 let strength = 0;
-                
+
                 if (password.length >= 6) strength += 1;
                 if (password.length >= 8) strength += 1;
                 if (/[A-Z]/.test(password)) strength += 1;
                 if (/[0-9]/.test(password)) strength += 1;
                 if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-                
+
                 let strengthClass = '';
                 let strengthLabel = '';
-                
+
                 if (strength <= 2) {
                     strengthClass = 'weak';
                     strengthLabel = 'Weak';
@@ -359,13 +365,13 @@
                     strengthClass = 'strong';
                     strengthLabel = 'Strong';
                 }
-                
+
                 strengthFill.className = 'strength-fill ' + strengthClass;
                 strengthText.textContent = `Password strength: ${strengthLabel}`;
-                
+
                 const confirmPassword = document.getElementById('confirm-password').value;
                 const matchMessage = document.getElementById('password-match');
-                
+
                 if (confirmPassword) {
                     if (password === confirmPassword) {
                         matchMessage.textContent = '✓ Passwords match';
@@ -376,12 +382,12 @@
                     }
                 }
             });
-            
+
             document.getElementById('confirm-password')?.addEventListener('input', function() {
                 const password = document.getElementById('password').value;
                 const confirmPassword = this.value;
                 const matchMessage = document.getElementById('password-match');
-                
+
                 if (password && confirmPassword) {
                     if (password === confirmPassword) {
                         matchMessage.textContent = '✓ Passwords match';
@@ -392,19 +398,19 @@
                     }
                 }
             });
-            
+
             // Password toggle
             const togglePassword1 = document.getElementById('togglePassword1');
             const togglePassword2 = document.getElementById('togglePassword2');
-            
+
             function setupPasswordToggle(toggleBtn, inputId) {
                 const passwordInput = document.getElementById(inputId);
                 const eyeIcon = toggleBtn.querySelector('i');
-                
+
                 toggleBtn.addEventListener('click', function() {
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
-                    
+
                     if (type === 'text') {
                         eyeIcon.classList.remove('fa-eye');
                         eyeIcon.classList.add('fa-eye-slash');
@@ -414,59 +420,78 @@
                     }
                 });
             }
-            
+
             if (togglePassword1) setupPasswordToggle(togglePassword1, 'password');
             if (togglePassword2) setupPasswordToggle(togglePassword2, 'confirm-password');
-            
+
             // Complete signup
-            document.getElementById('complete-signup')?.addEventListener('click', function() {
+            document.getElementById('complete-signup')?.addEventListener('click', async function() {
                 const formData = {
                     name: document.getElementById('name').value.trim(),
                     email: document.getElementById('email').value.trim(),
                     password: document.getElementById('password').value,
-                    ageGroup: document.getElementById('age-group').value,
-                    whyJoin: document.getElementById('why-join').value.trim(),
+                    age_group: document.getElementById('age-group').value,
+                    why_join: document.getElementById('why-join').value.trim(),
                     goals: []
                 };
-                
+
                 document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
                     formData.goals.push(checkbox.value);
                 });
-                
-                if (!formData.name || !formData.email || !formData.password || !formData.ageGroup) {
+
+                if (!formData.name || !formData.email || !formData.password || !formData.age_group) {
                     alert('Please complete all required fields.');
                     return;
                 }
-                
+
                 this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
                 this.disabled = true;
-                
-                setTimeout(() => {
-                    alert('Account created successfully! Welcome to SootheSpace. 🌸');
-                    window.location.href = 'dashboard.html';
-                }, 1500);
+
+                try {
+                    const response = await apiService.register(formData);
+
+                    if (response && response.token) {
+                        // Store token
+                        apiService.setToken(response.token);
+
+                        // Show success message
+                        alert('Account created successfully! Welcome to SootheSpace. 🌸');
+
+                        // Redirect to dashboard
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        alert(response.error || 'Registration failed. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    alert(error.message || 'An error occurred during registration. Please try again.');
+                } finally {
+                    // Reset button
+                    this.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+                    this.disabled = false;
+                }
             });
-            
+
             // Add checkbox styling
             const style = document.createElement('style');
             style.textContent = `
                 .checkbox-group {
                     margin-top: 0.5rem;
                 }
-                
+
                 .checkbox-item {
                     margin-bottom: 0.8rem;
                     display: flex;
                     align-items: center;
                     gap: 0.5rem;
                 }
-                
+
                 .checkbox-item input[type="checkbox"] {
                     width: 18px;
                     height: 18px;
                     accent-color: var(--medium-blue);
                 }
-                
+
                 .checkbox-item label {
                     font-weight: normal;
                     color: var(--text-dark);
