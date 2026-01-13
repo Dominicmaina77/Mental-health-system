@@ -1,10 +1,33 @@
 // Main JavaScript for SootheSpace
 
-document.addEventListener('DOMContentLoaded', function() {
+// Load API service dynamically
+function loadApiService() {
+    return new Promise((resolve, reject) => {
+        if (typeof ApiService !== 'undefined') {
+            // API service already loaded
+            resolve();
+        } else {
+            const script = document.createElement('script');
+            script.src = 'js/api.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load API service first
+    try {
+        await loadApiService();
+    } catch (error) {
+        console.error('Failed to load API service:', error);
+        return;
+    }
     // Mobile Menu Toggle
     const menuBtn = document.querySelector('.menu-btn');
     const navLinks = document.querySelector('.nav-links');
-    
+
     if (menuBtn) {
         menuBtn.addEventListener('click', function() {
             navLinks.classList.toggle('active');
@@ -12,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
             menuBtn.querySelector('i').classList.toggle('fa-times');
         });
     }
-    
+
     // Close mobile menu when clicking outside
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.navbar') && navLinks.classList.contains('active')) {
@@ -23,29 +46,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
+
     // Quote Carousel
     const quoteCards = document.querySelectorAll('.quote-card');
     const dots = document.querySelectorAll('.dot');
     const prevBtn = document.querySelector('.carousel-btn.prev');
     const nextBtn = document.querySelector('.carousel-btn.next');
-    
+
     if (quoteCards.length > 0) {
         let currentQuote = 0;
-        
+
         function showQuote(index) {
             quoteCards.forEach(card => card.classList.remove('active'));
             dots.forEach(dot => dot.classList.remove('active'));
-            
+
             quoteCards[index].classList.add('active');
             dots[index].classList.add('active');
             currentQuote = index;
         }
-        
+
         dots.forEach((dot, index) => {
             dot.addEventListener('click', () => showQuote(index));
         });
-        
+
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
                 let newIndex = currentQuote - 1;
@@ -53,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showQuote(newIndex);
             });
         }
-        
+
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
                 let newIndex = currentQuote + 1;
@@ -61,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showQuote(newIndex);
             });
         }
-        
+
         // Auto-rotate quotes every 5 seconds
         setInterval(() => {
             let newIndex = currentQuote + 1;
@@ -69,24 +92,24 @@ document.addEventListener('DOMContentLoaded', function() {
             showQuote(newIndex);
         }, 5000);
     }
-    
+
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            
+
             if (href === '#') return;
-            
+
             if (href.startsWith('#')) {
                 e.preventDefault();
                 const target = document.querySelector(href);
-                
+
                 if (target) {
                     window.scrollTo({
                         top: target.offsetTop - 80,
                         behavior: 'smooth'
                     });
-                    
+
                     // Close mobile menu if open
                     if (navLinks && navLinks.classList.contains('active')) {
                         navLinks.classList.remove('active');
@@ -99,14 +122,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // FAQ Accordion
     const faqQuestions = document.querySelectorAll('.faq-question');
     faqQuestions.forEach(question => {
         question.addEventListener('click', function() {
             const answer = this.nextElementSibling;
             const icon = this.querySelector('.faq-icon');
-            
+
             // Toggle answer
             if (answer.classList.contains('active')) {
                 answer.classList.remove('active');
@@ -117,30 +140,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     ans.classList.remove('active');
                     ans.previousElementSibling.querySelector('.faq-icon').textContent = '+';
                 });
-                
+
                 answer.classList.add('active');
                 icon.textContent = '−';
             }
         });
     });
-    
+
     // Open first FAQ by default
     if (faqQuestions.length > 0 && document.querySelector('.faq-answer')) {
         faqQuestions[0].click();
     }
-    
+
     // Resource Filter
     const categoryBtns = document.querySelectorAll('.category-btn');
     const resourceCards = document.querySelectorAll('.resource-card');
-    
+
     if (categoryBtns.length > 0) {
         categoryBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 categoryBtns.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                
+
                 const category = this.getAttribute('data-category');
-                
+
                 resourceCards.forEach(card => {
                     if (category === 'all' || card.getAttribute('data-category') === category) {
                         card.style.display = 'block';
@@ -159,21 +182,21 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
+
     // Contact Form Character Count
     const messageTextarea = document.getElementById('message');
     if (messageTextarea) {
         const charCount = document.getElementById('char-count');
         const wordCount = document.getElementById('word-count');
-        
+
         function updateCounts() {
             const text = messageTextarea.value;
             const chars = text.length;
             const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-            
+
             if (charCount) charCount.textContent = `${chars} characters`;
             if (wordCount) wordCount.textContent = `${words} words`;
-            
+
             if (chars > 500) {
                 charCount.style.color = '#00b894';
             } else if (chars > 250) {
@@ -182,44 +205,44 @@ document.addEventListener('DOMContentLoaded', function() {
                 charCount.style.color = 'var(--text-light)';
             }
         }
-        
+
         messageTextarea.addEventListener('input', updateCounts);
         updateCounts();
     }
-    
+
     // Breathing Animation
     const breathingAnimation = document.querySelector('.breathing-animation');
     if (breathingAnimation) {
         let breathCount = 0;
         const messages = ['Breathe In', 'Hold', 'Breathe Out', 'Hold'];
-        
+
         setInterval(() => {
             breathingAnimation.textContent = messages[breathCount % 4];
             breathCount++;
         }, 2000);
     }
-    
+
     // Form Validation Helper
     window.isValidEmail = function(email) {
         const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
     };
-    
+
     // Show Message Helper
     window.showMessage = function(message, type, element) {
         const existingMessage = document.querySelector('.form-message');
         if (existingMessage) existingMessage.remove();
-        
+
         const messageEl = document.createElement('div');
         messageEl.className = `form-message ${type}`;
         messageEl.textContent = message;
-        
+
         if (element) {
             element.appendChild(messageEl);
         } else {
             document.body.appendChild(messageEl);
         }
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (messageEl.parentNode) {
@@ -227,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 5000);
     };
-    
+
     // Set current date in dashboard
     const dateDisplay = document.getElementById('current-date');
     if (dateDisplay) {
@@ -235,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         dateDisplay.textContent = now.toLocaleDateString('en-US', options);
     }
-    
+
     // Animate stat numbers
     const statNumbers = document.querySelectorAll('.stat-number');
     statNumbers.forEach(stat => {
@@ -254,14 +277,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 30);
         }
     });
-    
+
     // Password toggle functionality (for all pages)
     document.querySelectorAll('.toggle-password').forEach(toggleBtn => {
         toggleBtn.addEventListener('click', function() {
             const input = this.previousElementSibling;
             const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
             input.setAttribute('type', type);
-            
+
             const icon = this.querySelector('i');
             if (icon) {
                 if (type === 'text') {
@@ -274,12 +297,72 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Initialize Charts if Chart.js is loaded
     if (typeof Chart !== 'undefined') {
         initializeCharts();
     }
+
+    // Check authentication status on pages that require it
+    checkAuthStatus();
 });
+
+// Authentication status check
+async function checkAuthStatus() {
+    try {
+        const authStatus = await apiService.getAuthStatus();
+
+        if (window.location.pathname.includes('dashboard.html') ||
+            window.location.pathname.includes('mood-tracker.html') ||
+            window.location.pathname.includes('journal.html') ||
+            window.location.pathname.includes('insights.html') ||
+            window.location.pathname.includes('reminders.html') ||
+            window.location.pathname.includes('profile.html')) {
+
+            if (!authStatus.authenticated) {
+                window.location.href = 'login.html';
+            } else {
+                // Update UI with user info
+                updateUserUI(authStatus.user);
+            }
+        }
+    } catch (error) {
+        console.error('Auth status check failed:', error);
+        // Don't redirect on error, let the API handle unauthorized access
+    }
+}
+
+// Update UI with user information
+function updateUserUI(user) {
+    if (user) {
+        // Update welcome message on dashboard
+        const welcomeElement = document.querySelector('.welcome-section h1');
+        if (welcomeElement) {
+            welcomeElement.innerHTML = `Welcome back, ${user.name}! 🌸`;
+        }
+
+        // Update nav links if needed
+        const loginLink = document.querySelector('.btn-login');
+        if (loginLink) {
+            loginLink.textContent = 'Log Out';
+            loginLink.href = 'javascript:void(0)';
+            loginLink.onclick = logout;
+        }
+    }
+}
+
+// Logout function
+async function logout() {
+    try {
+        await apiService.logout();
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Logout failed:', error);
+        // Clear token anyway
+        apiService.removeToken();
+        window.location.href = 'index.html';
+    }
+}
 
 // Chart Initialization Function
 function initializeCharts() {
@@ -334,7 +417,7 @@ function initializeCharts() {
             }
         });
     }
-    
+
     // Mood Distribution Chart
     const distCtx = document.getElementById('distributionChart');
     if (distCtx) {
@@ -356,7 +439,7 @@ function initializeCharts() {
             }
         });
     }
-    
+
     // Journal Entries Chart
     const entriesCtx = document.getElementById('entriesChart');
     if (entriesCtx) {
@@ -392,3 +475,6 @@ function initializeCharts() {
         });
     }
 }
+
+// Close the DOMContentLoaded event listener and async function
+});
