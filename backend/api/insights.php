@@ -9,13 +9,16 @@ require_once $basePath . '/includes/auth.php';
 require_once $basePath . '/models/MoodEntry.php';
 require_once $basePath . '/models/JournalEntry.php';
 
-header('Content-Type: application/json');
-
 // Require authentication for all insights operations
 $userId = requireAuth();
 
 $database = new Database();
 $db = $database->getConnection();
+
+// Set content type header for API responses
+if (!headers_sent()) {
+    header('Content-Type: application/json');
+}
 
 // Get request method
 $method = $_SERVER['REQUEST_METHOD'];

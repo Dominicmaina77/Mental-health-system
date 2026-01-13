@@ -108,7 +108,7 @@
                 <li><a href="insights.html">Insights</a></li>
                 <li><a href="reminders.html" class="active">Reminders</a></li>
                 <li><a href="profile.html">Profile</a></li>
-                <li><a href="login.html" class="btn-login">Log Out</a></li>
+                <li><a href="logout.php" class="btn-login">Log Out</a></li>
             </ul>
             <div class="menu-btn">
                 <i class="fas fa-bars"></i>
@@ -222,6 +222,21 @@
     <script src="js/script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
+            // Check if user is authenticated
+            try {
+                const authStatus = await apiService.getAuthStatus();
+                if (!authStatus || !authStatus.authenticated) {
+                    // Redirect to login if not authenticated
+                    window.location.href = 'login.php';
+                    return;
+                }
+            } catch (error) {
+                console.error('Authentication check failed:', error);
+                // Redirect to login if auth check fails
+                window.location.href = 'login.php';
+                return;
+            }
+
             // Load reminders from API
             async function loadReminders() {
                 try {

@@ -8,10 +8,13 @@ require_once $basePath . '/includes/functions.php';
 require_once $basePath . '/includes/auth.php';
 require_once $basePath . '/models/MoodEntry.php';
 
-header('Content-Type: application/json');
-
 // Require authentication for all mood operations
 $userId = requireAuth();
+
+// Set content type header for API responses
+if (!headers_sent()) {
+    header('Content-Type: application/json');
+}
 
 $database = new Database();
 $db = $database->getConnection();

@@ -7,10 +7,6 @@ if(session_status() == PHP_SESSION_NONE) {
 // Include config file
 require_once 'config/config.php';
 
-// Set content type header after config is loaded
-if (!headers_sent()) {
-    header('Content-Type: application/json');
-}
 
 // Simple API router
 $request = $_SERVER['REQUEST_URI'];
@@ -41,7 +37,10 @@ switch ($path) {
         break;
     case '':
     case 'index.php':
-        // API info endpoint
+        // API info endpoint - set header before output
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
         if(function_exists('jsonResponse')) {
             jsonResponse([
                 'name' => 'SootheSpace API',
@@ -74,6 +73,9 @@ switch ($path) {
         break;
     default:
         http_response_code(404);
+        if (!headers_sent()) {
+            header('Content-Type: application/json');
+        }
         echo json_encode(['error' => 'Endpoint not found']);
         break;
 }
