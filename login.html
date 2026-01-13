@@ -1,3 +1,62 @@
+<?php
+session_start();
+
+// Include necessary files
+require_once 'backend/config/config.php';
+require_once 'backend/includes/functions.php';
+require_once 'backend/includes/auth.php';
+require_once 'backend/models/User.php';
+
+// Check if form is submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $remember = isset($_POST['remember']);
+
+    // Validate input
+    if (empty($email) || empty($password)) {
+        $error = 'Please fill in all fields.';
+    } elseif (!validateEmail($email)) {
+        $error = 'Please enter a valid email address.';
+    } else {
+        // Connect to database
+        $database = new Database();
+        $db = $database->getConnection();
+
+        if (!$db) {
+            $error = 'Database connection failed.';
+        } else {
+            // Attempt login
+            $user = new User($db);
+
+            if ($user->findByEmail($email)) {
+                if (verifyPassword($password, $user->password_hash)) {
+                    if (!$user->is_active) {
+                        $error = 'Account is deactivated.';
+                    } else {
+                        // Login successful
+                        $token = login($user->id, $user->email, $user->name);
+                        
+                        // Set remember me if checked
+                        if ($remember) {
+                            setcookie('user_token', $token, time() + (86400 * 30), "/"); // 30 days
+                        }
+                        
+                        // Redirect to dashboard
+                        header('Location: dashboard.html');
+                        exit();
+                    }
+                } else {
+                    $error = 'Invalid credentials.';
+                }
+            } else {
+                $error = 'Invalid credentials.';
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,40 +96,44 @@
                     <h2>Welcome Back! 🌸</h2>
                     <p>Sign in to continue your wellness journey</p>
                 </div>
-                
-                <form id="login-form">
+
+                <form id="login-form" method="POST" action="login.html">
+                    <?php if (isset($error)): ?>
+                        <div class="form-message error"><?php echo htmlspecialchars($error); ?></div>
+                    <?php endif; ?>
+
                     <div class="form-group">
                         <label for="email"><i class="fas fa-envelope"></i> Email Address</label>
-                        <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="password"><i class="fas fa-lock"></i> Password</label>
                         <div class="password-toggle">
-                            <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
                             <button type="button" class="toggle-password" id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="remember-forgot">
                         <div class="remember-me">
-                            <input type="checkbox" id="remember">
+                            <input type="checkbox" id="remember" name="remember">
                             <label for="remember">Remember me</label>
                         </div>
                         <a href="#" class="forgot-password">Forgot password?</a>
                     </div>
-                    
+
                     <button type="submit" class="login-btn">
                         <i class="fas fa-sign-in-alt"></i> Sign In
                     </button>
                 </form>
-                
+
                 <div class="divider">
                     <span>Or continue with</span>
                 </div>
-                
+
                 <div class="social-login">
                     <button class="social-btn google">
                         <i class="fab fa-google"></i> Google
@@ -79,15 +142,15 @@
                         <i class="fab fa-apple"></i> Apple
                     </button>
                 </div>
-                
+
                 <div class="privacy-notice">
                     <i class="fas fa-lock"></i> Your data stays private — always.
                 </div>
-                
+
                 <div class="register-link">
                     <p>New to SootheSpace? <a href="signup.html">Create an account</a></p>
                 </div>
-                
+
                 <div class="login-quote">
                     <p>"Taking care of your mental health is an act of self-love. Every login is a step toward healing."</p>
                     <div class="author">- SootheSpace Team</div>
@@ -141,86 +204,26 @@
         </div>
     </footer>
 
-    <script src="js/api.js"></script>
-    <script src="js/script.js"></script>
     <script>
+        // Password toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             const togglePassword = document.getElementById('togglePassword');
             const passwordInput = document.getElementById('password');
             const eyeIcon = togglePassword.querySelector('i');
 
-            togglePassword.addEventListener('click', function() {
-                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                passwordInput.setAttribute('type', type);
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
 
-                if (type === 'text') {
-                    eyeIcon.classList.remove('fa-eye');
-                    eyeIcon.classList.add('fa-eye-slash');
-                } else {
-                    eyeIcon.classList.remove('fa-eye-slash');
-                    eyeIcon.classList.add('fa-eye');
-                }
-            });
-
-            document.getElementById('login-form').addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-                const remember = document.getElementById('remember').checked;
-
-                if (!email || !password) {
-                    showMessage('Please fill in all fields.', 'error');
-                    return;
-                }
-
-                if (!window.isValidEmail(email)) {
-                    showMessage('Please enter a valid email address.', 'error');
-                    return;
-                }
-
-                const loginBtn = document.querySelector('.login-btn');
-                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
-                loginBtn.disabled = true;
-
-                try {
-                    const response = await apiService.login({
-                        email: email,
-                        password: password
-                    });
-
-                    if (response && response.token) {
-                        // Store token
-                        apiService.setToken(response.token, remember);
-
-                        // Show success message
-                        showMessage('Login successful! Redirecting...', 'success');
-
-                        // Redirect to dashboard after a short delay
-                        setTimeout(() => {
-                            window.location.href = 'dashboard.html';
-                        }, 1000);
+                    if (type === 'text') {
+                        eyeIcon.classList.remove('fa-eye');
+                        eyeIcon.classList.add('fa-eye-slash');
                     } else {
-                        showMessage(response.error || 'Login failed. Please try again.', 'error');
+                        eyeIcon.classList.remove('fa-eye-slash');
+                        eyeIcon.classList.add('fa-eye');
                     }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    showMessage(error.message || 'An error occurred during login. Please try again.', 'error');
-                } finally {
-                    // Reset button
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
-                    loginBtn.disabled = false;
-                }
-            });
-
-            function showMessage(message, type) {
-                const existingMessage = document.querySelector('.form-message');
-                if (existingMessage) existingMessage.remove();
-
-                const messageEl = document.createElement('div');
-                messageEl.className = `form-message ${type}`;
-                messageEl.textContent = message;
-                document.getElementById('login-form').appendChild(messageEl);
+                });
             }
         });
     </script>
