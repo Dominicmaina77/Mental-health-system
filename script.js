@@ -312,7 +312,7 @@ async function checkAuthStatus() {
     try {
         const authStatus = await apiService.getAuthStatus();
 
-        if (window.location.pathname.includes('dashboard.html') ||
+        if (window.location.pathname.includes('dashboard.php') ||
             window.location.pathname.includes('mood-tracker.html') ||
             window.location.pathname.includes('journal.html') ||
             window.location.pathname.includes('insights.html') ||
@@ -355,12 +355,12 @@ function updateUserUI(user) {
 async function logout() {
     try {
         await apiService.logout();
-        window.location.href = 'index.html';
+        window.location.href = 'index.php';
     } catch (error) {
         console.error('Logout failed:', error);
         // Clear token anyway
         apiService.removeToken();
-        window.location.href = 'index.html';
+        window.location.href = 'index.php';
     }
 }
 

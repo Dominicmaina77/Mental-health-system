@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                         
                         // Redirect to dashboard
-                        header('Location: dashboard.html');
+                        header('Location: dashboard.php');
                         exit();
                     }
                 } else {
@@ -72,15 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <a href="index.php" class="logo">SootheSpace 🌸</a>
             <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="features.html">Features</a></li>
-                <li><a href="resources.html">Resources</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html" class="btn-login active">Log In</a></li>
-                <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="about.php">About</a></li>
+                <li><a href="features.php">Features</a></li>
+                <li><a href="resources.php">Resources</a></li>
+                <li><a href="contact.php">Contact</a></li>
+                <li><a href="login.php" class="btn-login active">Log In</a></li>
+                <li><a href="signup.php" class="btn-signup">Sign Up</a></li>
             </ul>
             <div class="menu-btn">
                 <i class="fas fa-bars"></i>
@@ -176,10 +176,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="features.html">Features</a></li>
-                        <li><a href="resources.html">Resources</a></li>
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="about.php">About</a></li>
+                        <li><a href="features.php">Features</a></li>
+                        <li><a href="resources.php">Resources</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">

@@ -1,3 +1,10 @@
+<?php
+session_start();
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']);
+$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +22,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .hero::before {
             content: '';
             position: absolute;
@@ -25,51 +32,51 @@
             bottom: 0;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23a8d8ea' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
-        
+
         .hero-content {
             position: relative;
             z-index: 2;
         }
-        
+
         .floating-emojis {
             position: absolute;
             z-index: 1;
             font-size: 2rem;
             animation: float 6s ease-in-out infinite;
         }
-        
+
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(5deg); }
         }
-        
+
         .emoji-1 { top: 10%; left: 5%; animation-delay: 0s; }
         .emoji-2 { top: 20%; right: 10%; animation-delay: 2s; }
         .emoji-3 { bottom: 15%; left: 15%; animation-delay: 4s; }
         .emoji-4 { bottom: 25%; right: 5%; animation-delay: 1s; }
         .emoji-5 { top: 40%; left: 20%; animation-delay: 3s; }
-        
+
         .tagline {
             font-size: 1.3rem;
             color: var(--text-light);
             margin-bottom: 2rem;
             line-height: 1.6;
         }
-        
+
         .cta-buttons {
             display: flex;
             gap: 1rem;
             margin-bottom: 3rem;
             flex-wrap: wrap;
         }
-        
+
         .hero-stats {
             display: flex;
             gap: 2rem;
             margin-top: 2rem;
             flex-wrap: wrap;
         }
-        
+
         .stat {
             text-align: center;
             padding: 1rem;
@@ -78,32 +85,32 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        
+
         .number {
             font-size: 2rem;
             font-weight: 700;
             color: var(--dark-blue);
             display: block;
         }
-        
+
         .label {
             font-size: 0.9rem;
             color: var(--text-light);
             display: block;
         }
-        
+
         .features-preview {
             padding: 5rem 0;
             background-color: var(--white);
         }
-        
+
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
-        
+
         .feature-card {
             background-color: var(--light-blue);
             padding: 2rem;
@@ -112,30 +119,30 @@
             transition: var(--transition);
             border: 2px solid transparent;
         }
-        
+
         .feature-card:hover {
             transform: translateY(-10px);
             border-color: var(--medium-blue);
             box-shadow: 0 15px 35px rgba(122, 184, 217, 0.2);
         }
-        
+
         .feature-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
         }
-        
+
         .testimonials {
             padding: 5rem 0;
             background: linear-gradient(135deg, var(--soft-blue) 0%, var(--light-blue) 100%);
         }
-        
+
         .testimonial-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
-        
+
         .testimonial-card {
             background-color: var(--white);
             padding: 2rem;
@@ -143,7 +150,7 @@
             box-shadow: 0 10px 30px var(--shadow);
             position: relative;
         }
-        
+
         .testimonial-card::before {
             content: '"';
             position: absolute;
@@ -153,14 +160,14 @@
             color: var(--pastel-blue);
             font-family: serif;
         }
-        
+
         .testimonial-author {
             display: flex;
             align-items: center;
             gap: 1rem;
             margin-top: 1.5rem;
         }
-        
+
         .author-avatar {
             width: 50px;
             height: 50px;
@@ -172,38 +179,38 @@
             color: white;
             font-weight: 600;
         }
-        
+
         .cta-section {
             padding: 5rem 0;
             background: linear-gradient(135deg, var(--medium-blue) 0%, var(--dark-blue) 100%);
             color: white;
             text-align: center;
         }
-        
+
         .cta-section h2 {
             color: white;
             margin-bottom: 1rem;
         }
-        
+
         .cta-section p {
             color: rgba(255, 255, 255, 0.9);
             max-width: 700px;
             margin: 0 auto 2rem;
         }
-        
+
         @media (max-width: 768px) {
             .hero {
                 padding: 3rem 0;
             }
-            
+
             .cta-buttons {
                 flex-direction: column;
             }
-            
+
             .hero-stats {
                 justify-content: center;
             }
-            
+
             .floating-emojis {
                 font-size: 1.5rem;
             }
@@ -214,15 +221,20 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <a href="index.php" class="logo">SootheSpace 🌸</a>
             <ul class="nav-links">
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="features.html">Features</a></li>
-                <li><a href="resources.html">Resources</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html" class="btn-login">Log In</a></li>
-                <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+                <li><a href="index.php" class="active">Home</a></li>
+                <li><a href="about.php">About</a></li>
+                <li><a href="features.php">Features</a></li>
+                <li><a href="resources.php">Resources</a></li>
+                <li><a href="contact.php">Contact</a></li>
+                <?php if ($isLoggedIn): ?>
+                    <li><a href="dashboard.php" class="btn-login">Dashboard</a></li>
+                    <li><a href="logout.php" class="btn-signup">Log Out</a></li>
+                <?php else: ?>
+                    <li><a href="login.php" class="btn-login">Log In</a></li>
+                    <li><a href="signup.php" class="btn-signup">Sign Up</a></li>
+                <?php endif; ?>
             </ul>
             <div class="menu-btn">
                 <i class="fas fa-bars"></i>
@@ -239,13 +251,18 @@
             <div class="floating-emojis emoji-3">🌈</div>
             <div class="floating-emojis emoji-4">💭</div>
             <div class="floating-emojis emoji-5">🌸</div>
-            
+
             <div class="hero-content">
                 <h1>Your Space to Understand, Track & Improve Your Mental Well-Being 🌈</h1>
                 <p class="tagline">A safe, private haven for young minds to explore emotions, build resilience, and grow stronger every day. <i class="fas fa-heart"></i></p>
                 <div class="cta-buttons">
-                    <a href="signup.html" class="btn-primary">Start Tracking Your Mood 🎯</a>
-                    <a href="features.html" class="btn-secondary">Learn More <i class="fas fa-arrow-right"></i></a>
+                    <?php if ($isLoggedIn): ?>
+                        <a href="dashboard.php" class="btn-primary">Go to Dashboard 🎯</a>
+                        <a href="mood-tracker.html" class="btn-secondary">Track Mood <i class="fas fa-arrow-right"></i></a>
+                    <?php else: ?>
+                        <a href="signup.php" class="btn-primary">Start Tracking Your Mood 🎯</a>
+                        <a href="features.php" class="btn-secondary">Learn More <i class="fas fa-arrow-right"></i></a>
+                    <?php endif; ?>
                 </div>
                 <div class="hero-stats">
                     <div class="stat">
@@ -362,11 +379,15 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="features.html">Features</a></li>
-                        <li><a href="resources.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="about.php">About</a></li>
+                        <li><a href="features.php">Features</a></li>
+                        <li><a href="resources.php">Resources</a></li>
+                        <li><a href="contact.php">Contact</a></li>
+                        <?php if ($isLoggedIn): ?>
+                            <li><a href="dashboard.php">Dashboard</a></li>
+                            <li><a href="profile.html">Profile</a></li>
+                        <?php endif; ?>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -392,6 +413,32 @@
     </footer>
 
     <script src="js/api.js"></script>
-    <script src="js/script.js"></script>
+    <script>
+        // Update navigation based on user status
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const menuBtn = document.querySelector('.menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+
+            if (menuBtn) {
+                menuBtn.addEventListener('click', function() {
+                    navLinks.classList.toggle('active');
+                    menuBtn.querySelector('i').classList.toggle('fa-bars');
+                    menuBtn.querySelector('i').classList.toggle('fa-times');
+                });
+            }
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar') && navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    if (menuBtn) {
+                        menuBtn.querySelector('i').classList.remove('fa-times');
+                        menuBtn.querySelector('i').classList.add('fa-bars');
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

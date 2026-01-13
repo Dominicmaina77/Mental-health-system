@@ -167,18 +167,30 @@
     </style>
 </head>
 <body>
+<?php
+session_start();
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']);
+$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
+?>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <a href="index.php" class="logo">SootheSpace 🌸</a>
             <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="features.html" class="active">Features</a></li>
-                <li><a href="resources.html">Resources</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html" class="btn-login">Log In</a></li>
-                <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="about.php">About</a></li>
+                <li><a href="features.php" class="active">Features</a></li>
+                <li><a href="resources.php">Resources</a></li>
+                <li><a href="contact.php">Contact</a></li>
+                <?php if ($isLoggedIn): ?>
+                    <li><a href="dashboard.php" class="btn-login">Dashboard</a></li>
+                    <li><a href="logout.php" class="btn-signup">Log Out</a></li>
+                <?php else: ?>
+                    <li><a href="login.php" class="btn-login">Log In</a></li>
+                    <li><a href="signup.php" class="btn-signup">Sign Up</a></li>
+                <?php endif; ?>
             </ul>
             <div class="menu-btn">
                 <i class="fas fa-bars"></i>
@@ -373,10 +385,14 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="resources.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="about.php">About</a></li>
+                        <li><a href="resources.php">Resources</a></li>
+                        <li><a href="contact.php">Contact</a></li>
+                        <?php if ($isLoggedIn): ?>
+                            <li><a href="dashboard.php">Dashboard</a></li>
+                            <li><a href="profile.html">Profile</a></li>
+                        <?php endif; ?>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -401,6 +417,33 @@
         </div>
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // Update navigation based on user status
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const menuBtn = document.querySelector('.menu-btn');
+            const navLinks = document.querySelector('.nav-links');
+
+            if (menuBtn) {
+                menuBtn.addEventListener('click', function() {
+                    navLinks.classList.toggle('active');
+                    menuBtn.querySelector('i').classList.toggle('fa-bars');
+                    menuBtn.querySelector('i').classList.toggle('fa-times');
+                });
+            }
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.navbar') && navLinks.classList.contains('active')) {
+                    navLinks.classList.remove('active');
+                    if (menuBtn) {
+                        menuBtn.querySelector('i').classList.remove('fa-times');
+                        menuBtn.querySelector('i').classList.add('fa-bars');
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

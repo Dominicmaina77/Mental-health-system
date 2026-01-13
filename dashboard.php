@@ -1,3 +1,17 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // Redirect to login if not logged in
+    header('Location: login.html');
+    exit();
+}
+
+// Get user information from session
+$user_name = $_SESSION['user_name'] ?? 'User';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +29,7 @@
             padding: 2rem 0 4rem;
             background-color: var(--light-blue);
         }
-        
+
         .dashboard-header {
             display: flex;
             justify-content: space-between;
@@ -24,12 +38,12 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-        
+
         .welcome-section h1 {
             color: var(--dark-blue);
             margin-bottom: 0.5rem;
         }
-        
+
         .date-display {
             background-color: var(--white);
             padding: 0.8rem 1.5rem;
@@ -38,13 +52,13 @@
             font-weight: 600;
             color: var(--dark-blue);
         }
-        
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             gap: 1.5rem;
         }
-        
+
         .dashboard-card {
             background-color: var(--white);
             border-radius: var(--radius);
@@ -52,12 +66,12 @@
             box-shadow: 0 5px 15px var(--shadow);
             transition: var(--transition);
         }
-        
+
         .dashboard-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(122, 184, 217, 0.3);
         }
-        
+
         .dashboard-card h3 {
             display: flex;
             align-items: center;
@@ -66,42 +80,42 @@
             color: var(--dark-blue);
             font-size: 1.2rem;
         }
-        
+
         /* Today's Mood Card */
         .today-mood {
             grid-column: span 4;
         }
-        
+
         .mood-display {
             text-align: center;
             padding: 1rem 0;
         }
-        
+
         .today-mood-emoji {
             font-size: 4rem;
             margin-bottom: 1rem;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
-        
+
         .mood-number {
             font-size: 2.5rem;
             font-weight: 700;
             color: var(--dark-blue);
             display: block;
         }
-        
+
         .mood-label {
             font-size: 1.1rem;
             color: var(--text-light);
             display: block;
             margin-bottom: 1rem;
         }
-        
+
         .mood-note {
             background-color: var(--light-blue);
             padding: 1rem;
@@ -110,64 +124,64 @@
             text-align: left;
             font-style: italic;
         }
-        
+
         .no-mood {
             text-align: center;
             padding: 2rem 0;
         }
-        
+
         /* Quick Stats Card */
         .quick-stats {
             grid-column: span 4;
         }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
         }
-        
+
         .stat-item {
             text-align: center;
             padding: 1rem;
             background-color: var(--light-blue);
             border-radius: 8px;
         }
-        
+
         .stat-number {
             font-size: 2rem;
             font-weight: 700;
             color: var(--dark-blue);
             display: block;
         }
-        
+
         .stat-label {
             font-size: 0.9rem;
             color: var(--text-light);
             display: block;
         }
-        
+
         /* Mood Chart Card */
         .mood-chart {
             grid-column: span 4;
         }
-        
+
         .chart-container {
             height: 200px;
             position: relative;
         }
-        
+
         /* Quick Actions Card */
         .quick-actions {
             grid-column: span 6;
         }
-        
+
         .actions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 1rem;
         }
-        
+
         .action-btn {
             display: flex;
             flex-direction: column;
@@ -180,32 +194,32 @@
             color: var(--text-dark);
             transition: var(--transition);
         }
-        
+
         .action-btn:hover {
             background-color: var(--pastel-blue);
             transform: translateY(-3px);
         }
-        
+
         .action-icon {
             font-size: 2rem;
             margin-bottom: 0.5rem;
         }
-        
+
         .action-label {
-            font-weight: 600;
             font-size: 0.9rem;
+            color: var(--text-light);
             text-align: center;
         }
-        
+
         /* Recent Journal Card */
         .recent-journal {
             grid-column: span 6;
         }
-        
+
         .journal-list {
             margin-top: 1rem;
         }
-        
+
         .journal-item {
             padding: 1rem;
             background-color: var(--light-blue);
@@ -216,41 +230,41 @@
             align-items: center;
             transition: var(--transition);
         }
-        
+
         .journal-item:hover {
             background-color: var(--pastel-blue);
         }
-        
+
         .journal-title {
             font-weight: 600;
             color: var(--text-dark);
         }
-        
+
         .journal-date {
             font-size: 0.9rem;
             color: var(--text-light);
         }
-        
+
         .view-all {
             text-align: center;
             margin-top: 1rem;
         }
-        
+
         .view-all a {
             color: var(--medium-blue);
             text-decoration: none;
             font-weight: 600;
         }
-        
+
         .view-all a:hover {
             text-decoration: underline;
         }
-        
+
         /* Daily Quote Card */
         .daily-quote {
             grid-column: span 6;
         }
-        
+
         .quote-content {
             padding: 1.5rem;
             background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-lavender) 100%);
@@ -258,29 +272,29 @@
             color: white;
             margin-bottom: 1rem;
         }
-        
+
         .quote-text {
             font-style: italic;
             font-size: 1.2rem;
             margin-bottom: 1rem;
             color: white;
         }
-        
+
         .quote-author {
             font-weight: 600;
             text-align: right;
             color: rgba(255, 255, 255, 0.9);
         }
-        
+
         /* Reminders Card */
         .reminders {
             grid-column: span 6;
         }
-        
+
         .reminder-list {
             margin-top: 1rem;
         }
-        
+
         .reminder-item {
             display: flex;
             align-items: center;
@@ -290,7 +304,7 @@
             margin-bottom: 0.8rem;
             gap: 1rem;
         }
-        
+
         .reminder-time {
             background-color: var(--medium-blue);
             color: white;
@@ -300,49 +314,49 @@
             min-width: 80px;
             text-align: center;
         }
-        
+
         .reminder-title {
             font-weight: 600;
             color: var(--text-dark);
             flex: 1;
         }
-        
+
         /* Wellness Tip Card */
         .wellness-tip {
             grid-column: span 12;
             background: linear-gradient(135deg, var(--medium-blue) 0%, var(--dark-blue) 100%);
             color: white;
         }
-        
+
         .wellness-tip h3 {
             color: white;
         }
-        
+
         .tip-content {
             font-size: 1.1rem;
             line-height: 1.6;
         }
-        
+
         /* Responsive Design */
         @media (max-width: 1200px) {
             .today-mood, .quick-stats, .mood-chart {
                 grid-column: span 6;
             }
         }
-        
+
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .dashboard-card {
                 grid-column: span 1 !important;
             }
-            
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .actions-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -353,15 +367,15 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
-            <a href="index.html" class="logo">SootheSpace 🌸</a>
+            <a href="index.php" class="logo">SootheSpace 🌸</a>
             <ul class="nav-links">
-                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="dashboard.php" class="active">Dashboard</a></li>
                 <li><a href="mood-tracker.html">Mood Tracker</a></li>
                 <li><a href="journal.html">Journal</a></li>
                 <li><a href="insights.html">Insights</a></li>
                 <li><a href="reminders.html">Reminders</a></li>
                 <li><a href="profile.html">Profile</a></li>
-                <li><a href="login.html" class="btn-login">Log Out</a></li>
+                <li><a href="logout.php" class="btn-login">Log Out</a></li>
             </ul>
             <div class="menu-btn">
                 <i class="fas fa-bars"></i>
@@ -369,19 +383,19 @@
         </div>
     </nav>
 
-    <!-- Dashboard Header -->
+    <!-- Dashboard -->
     <section class="dashboard">
         <div class="container">
             <div class="dashboard-header">
                 <div class="welcome-section">
-                    <h1 id="welcome-message">Welcome back! 🌸</h1>
+                    <h1>Welcome back, <?php echo htmlspecialchars($user_name); ?>! 🌸</h1>
                     <p>Here's your mental wellness overview for today.</p>
                 </div>
                 <div class="date-display">
                     <i class="fas fa-calendar-alt"></i> <span id="current-date">Loading...</span>
                 </div>
             </div>
-            
+
             <div class="dashboard-grid">
                 <!-- Today's Mood Card -->
                 <div class="dashboard-card today-mood">
@@ -395,7 +409,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Quick Stats Card -->
                 <div class="dashboard-card quick-stats">
                     <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
@@ -418,7 +432,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Mood Chart Card -->
                 <div class="dashboard-card mood-chart">
                     <h3><i class="fas fa-chart-area"></i> Weekly Mood Trend</h3>
@@ -426,7 +440,7 @@
                         <canvas id="weeklyMoodChart"></canvas>
                     </div>
                 </div>
-                
+
                 <!-- Quick Actions Card -->
                 <div class="dashboard-card quick-actions">
                     <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
@@ -447,7 +461,7 @@
                             <div class="action-icon">🔔</div>
                             <div class="action-label">Set Reminder</div>
                         </a>
-                        <a href="resources.html" class="action-btn">
+                        <a href="resources.php" class="action-btn">
                             <div class="action-icon">📚</div>
                             <div class="action-label">Resources</div>
                         </a>
@@ -457,7 +471,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <!-- Recent Journal Card -->
                 <div class="dashboard-card recent-journal">
                     <h3><i class="fas fa-book"></i> Recent Journal Entries</h3>
@@ -479,7 +493,7 @@
                         <a href="journal.html">View All Entries <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
-                
+
                 <!-- Daily Quote Card -->
                 <div class="dashboard-card daily-quote">
                     <h3><i class="fas fa-quote-left"></i> Daily Dose of Positivity</h3>
@@ -491,7 +505,7 @@
                         <i class="fas fa-sync-alt"></i> Refreshes daily at midnight
                     </p>
                 </div>
-                
+
                 <!-- Reminders Card -->
                 <div class="dashboard-card reminders">
                     <h3><i class="fas fa-bell"></i> Upcoming Reminders</h3>
@@ -516,7 +530,7 @@
                         <a href="reminders.html">Manage Reminders <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
-                
+
                 <!-- Wellness Tip Card -->
                 <div class="dashboard-card wellness-tip">
                     <h3><i class="fas fa-lightbulb"></i> Today's Wellness Tip</h3>
@@ -543,10 +557,10 @@
                 <div class="footer-section">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="resources.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="index.php">Home</a></li>
+                        <li><a href="about.php">About</a></li>
+                        <li><a href="resources.php">Resources</a></li>
+                        <li><a href="contact.php">Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
@@ -571,190 +585,78 @@
         </div>
     </footer>
 
-    <script src="js/api.js"></script>
     <script src="js/script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             // Set current date
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
 
-            // Load dashboard data from API
-            async function loadDashboardData() {
-                try {
-                    // Load user's mood data
-                    const moodResponse = await apiService.getMoodEntries(7); // Get last 7 days
-                    if (moodResponse && moodResponse.mood_entries) {
-                        // Update today's mood
-                        const todayMood = moodResponse.mood_entries.find(entry =>
-                            entry.date_recorded === new Date().toISOString().split('T')[0]
-                        );
+            // Weekly Mood Chart
+            const weeklyCtx = document.getElementById('weeklyMoodChart')?.getContext('2d');
+            if (weeklyCtx) {
+                const weeklyLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const weeklyData = [6, 7, 5, 8, 7, 9, 8];
 
-                        if (todayMood) {
-                            document.querySelector('.today-mood-emoji').textContent = getMoodEmoji(todayMood.mood_value);
-                            document.querySelector('.mood-number').textContent = `${todayMood.mood_value}/10`;
-                            document.querySelector('.mood-label').textContent = getMoodLabel(todayMood.mood_value);
-
-                            if (todayMood.mood_note) {
-                                document.querySelector('.mood-note').textContent = `"${todayMood.mood_note}"`;
-                            }
-                        }
-
-                        // Update mood chart with real data
-                        if (moodResponse.mood_entries.length > 0) {
-                            updateMoodChart(moodResponse.mood_entries);
-                        }
-                    }
-
-                    // Load user's journal data
-                    const journalResponse = await apiService.getJournalEntries(1, 3); // Get last 3 entries
-                    if (journalResponse && journalResponse.journal_entries) {
-                        updateJournalList(journalResponse.journal_entries);
-                    }
-
-                    // Load user's reminder data
-                    const reminderResponse = await apiService.getReminders();
-                    if (reminderResponse && reminderResponse.reminders) {
-                        updateRemindersList(reminderResponse.reminders);
-                    }
-
-                    // Load user's insights
-                    const insightsResponse = await apiService.getInsights();
-                    if (insightsResponse && insightsResponse.insights) {
-                        updateStats(insightsResponse.insights);
-                    }
-                } catch (error) {
-                    console.error('Error loading dashboard data:', error);
-                }
-            }
-
-            // Update mood chart with real data
-            function updateMoodChart(moodEntries) {
-                const weeklyCtx = document.getElementById('weeklyMoodChart')?.getContext('2d');
-                if (weeklyCtx) {
-                    // Prepare data for chart
-                    const labels = moodEntries.map(entry => {
-                        const date = new Date(entry.date_recorded);
-                        return date.toLocaleDateString('en-US', { weekday: 'short' });
-                    });
-
-                    const data = moodEntries.map(entry => entry.mood_value);
-
-                    // Destroy existing chart if it exists
-                    if (window.moodChart) {
-                        window.moodChart.destroy();
-                    }
-
-                    window.moodChart = new Chart(weeklyCtx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Mood Score',
-                                data: data,
-                                borderColor: 'rgba(122, 184, 217, 1)',
-                                backgroundColor: 'rgba(122, 184, 217, 0.1)',
-                                borderWidth: 3,
-                                fill: true,
-                                tension: 0.4,
-                                pointBackgroundColor: 'rgba(74, 140, 179, 1)',
-                                pointBorderColor: '#fff',
-                                pointBorderWidth: 2,
-                                pointRadius: 5
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    beginAtZero: false,
-                                    min: 1,
-                                    max: 10,
-                                    ticks: { stepSize: 1 },
-                                    grid: { color: 'rgba(168, 216, 234, 0.2)' }
-                                },
-                                x: {
-                                    grid: { color: 'rgba(168, 216, 234, 0.2)' }
-                                }
+                new Chart(weeklyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: weeklyLabels,
+                        datasets: [{
+                            label: 'Mood Score',
+                            data: weeklyData,
+                            borderColor: 'rgba(122, 184, 217, 1)',
+                            backgroundColor: 'rgba(122, 184, 217, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(74, 140, 179, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 1,
+                                max: 10,
+                                ticks: { stepSize: 1 },
+                                grid: { color: 'rgba(168, 216, 234, 0.2)' }
                             },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            const value = Math.round(context.parsed.y);
-                                            return `Mood: ${value}/10 - ${getMoodLabel(value)}`;
-                                        }
+                            x: {
+                                grid: { color: 'rgba(168, 216, 234, 0.2)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const labels = ['Very Low', 'Low', 'Somewhat Low', 'A Bit Low', 'Neutral', 'Okay', 'Good', 'Very Good', 'Great', 'Excellent'];
+                                        const value = Math.round(context.parsed.y);
+                                        return `Mood: ${value}/10 - ${labels[value-1] || 'Neutral'}`;
                                     }
                                 }
                             }
                         }
-                    });
-                }
-            }
-
-            // Update journal list with real data
-            function updateJournalList(journalEntries) {
-                const journalList = document.querySelector('.journal-list');
-                journalList.innerHTML = ''; // Clear existing entries
-
-                journalEntries.forEach(entry => {
-                    const journalItem = document.createElement('div');
-                    journalItem.className = 'journal-item';
-
-                    // Format date
-                    const date = new Date(entry.created_at);
-                    const formattedDate = date.toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric'
-                    });
-
-                    journalItem.innerHTML = `
-                        <div class="journal-title">${entry.title || 'Untitled Entry'}</div>
-                        <div class="journal-date">${formattedDate}</div>
-                    `;
-
-                    journalList.appendChild(journalItem);
+                    }
                 });
             }
 
-            // Update reminders list with real data
-            function updateRemindersList(reminders) {
-                const reminderList = document.querySelector('.reminder-list');
-                reminderList.innerHTML = ''; // Clear existing entries
-
-                reminders.forEach(reminder => {
-                    const reminderItem = document.createElement('div');
-                    reminderItem.className = 'reminder-item';
-
-                    reminderItem.innerHTML = `
-                        <div class="reminder-time">${reminder.reminder_time}</div>
-                        <div class="reminder-title">${reminder.title}</div>
-                        <i class="fas fa-check-circle" style="color: var(--medium-blue); cursor: pointer;"></i>
-                    `;
-
-                    // Add event listener to mark as completed
-                    reminderItem.querySelector('.fa-check-circle').addEventListener('click', function() {
-                        markReminderCompleted(reminder.id, reminderItem);
-                    });
-
-                    reminderList.appendChild(reminderItem);
-                });
-            }
-
-            // Mark reminder as completed
-            async function markReminderCompleted(reminderId, element) {
-                try {
-                    // In a real implementation, we would update the reminder status via API
-                    // For now, we'll just remove it from the list
-                    element.style.opacity = '0.5';
-                    element.style.textDecoration = 'line-through';
+            // Complete reminder action
+            document.querySelectorAll('.reminder-item .fa-check-circle').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const reminderItem = this.closest('.reminder-item');
+                    reminderItem.style.opacity = '0.5';
+                    reminderItem.style.textDecoration = 'line-through';
 
                     setTimeout(() => {
-                        element.remove();
-                        // Update stats
+                        reminderItem.remove();
                         const statElement = document.querySelector('.stat-item:nth-child(3) .stat-number');
                         if (statElement) {
                             const currentCount = parseInt(statElement.textContent);
@@ -763,49 +665,8 @@
                             }
                         }
                     }, 1000);
-                } catch (error) {
-                    console.error('Error marking reminder as completed:', error);
-                }
-            }
-
-            // Update stats with real data
-            function updateStats(insights) {
-                if (insights.average_mood) {
-                    // Update mood stats
-                    document.querySelector('.stat-item:nth-child(1) .stat-number').textContent = insights.mood_streak || 0;
-                    document.querySelector('.stat-item:nth-child(2) .stat-number').textContent = insights.journal_stats.total_entries || 0;
-                    document.querySelector('.stat-item:nth-child(3) .stat-number').textContent = insights.insights?.reminders?.active_count || 0;
-                    document.querySelector('.stat-item:nth-child(4) .stat-number').textContent = '100%';
-                }
-            }
-
-            // Helper functions
-            function getMoodLabel(value) {
-                const labels = {
-                    1: 'Very Low',
-                    2: 'Low',
-                    3: 'Somewhat Low',
-                    4: 'A Bit Low',
-                    5: 'Neutral',
-                    6: 'Okay',
-                    7: 'Good',
-                    8: 'Very Good',
-                    9: 'Great',
-                    10: 'Excellent'
-                };
-                return labels[value] || 'Neutral';
-            }
-
-            function getMoodEmoji(value) {
-                if (value <= 2) return '😢';
-                if (value <= 4) return '😞';
-                if (value <= 6) return '😐';
-                if (value <= 8) return '🙂';
-                return '😊';
-            }
-
-            // Initialize dashboard data
-            loadDashboardData();
+                });
+            });
 
             // Animate stat numbers
             const statNumbers = document.querySelectorAll('.stat-number');
