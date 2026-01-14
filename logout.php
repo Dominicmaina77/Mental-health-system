@@ -16,8 +16,23 @@ session_destroy();
 if (isset($_COOKIE['user_token'])) {
     setcookie('user_token', '', time()-3600, '/');
 }
-
-// Redirect to home page
-header('Location: index.php');
-exit();
 ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logging Out...</title>
+</head>
+<body>
+    <p>Logging out...</p>
+
+    <script>
+        // Clear browser storage tokens
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+
+        // Redirect to home page
+        window.location.href = 'index.php';
+    </script>
+</body>
+</html>

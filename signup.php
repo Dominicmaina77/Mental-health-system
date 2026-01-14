@@ -68,9 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($userId) {
                     // Login the user after registration
                     $token = login($userId, $user->email, $user->name);
-                    
+
                     $success = 'Account created successfully! Welcome to SootheSpace.';
-                    
+
+                    // Store the token in browser storage for JavaScript-based pages
+                    echo "<script>";
+                    echo "localStorage.setItem('token', '" . addslashes($token) . "');";
+                    echo "sessionStorage.setItem('token', '" . addslashes($token) . "');";
+                    echo "</script>";
+
                     // Redirect to dashboard after a short delay
                     header('Refresh: 2; URL=dashboard.php');
                 } else {

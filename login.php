@@ -42,6 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             setcookie('user_token', $token, time() + (86400 * 30), "/"); // 30 days
                         }
 
+                        // Store the token in browser storage for JavaScript-based pages
+                        echo "<script>";
+                        echo "localStorage.setItem('token', '" . addslashes($token) . "');";
+                        echo "sessionStorage.setItem('token', '" . addslashes($token) . "');";
+                        echo "</script>";
+
                         // Redirect to dashboard
                         header('Location: dashboard.php');
                         exit();
