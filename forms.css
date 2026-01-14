@@ -549,20 +549,20 @@
     box-shadow: 0 4px 10px rgba(122, 184, 217, 0.3);
 }
 
+.age-option.selected i,
+.age-option.selected div {
+    color: white;
+}
+
 .age-option i {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
     display: block;
 }
 
-.age-option .age-range {
+.age-option div {
     font-weight: 600;
     display: block;
-}
-
-.age-option .age-label {
-    font-size: 0.8rem;
-    opacity: 0.8;
 }
 
 /* Checkbox Group */

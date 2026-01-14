@@ -181,8 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="form-navigation">
                             <div></div>
-                            <button type="submit" class="btn-next">
-                                Create Account <i class="fas fa-arrow-right"></i>
+                            <button type="button" class="btn-next">
+                                Next <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>
 
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <!-- Step 2: Profile Information (Hidden in this version since we're simplifying) -->
+                    <!-- Step 2: Profile Information -->
                     <div id="step-2" class="form-pages" style="display:none;">
                         <div class="form-group">
                             <label><i class="fas fa-user-friends"></i> Age Group</label>
@@ -235,6 +235,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label for="goal-sleep">Improve sleep habits</label>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="btn-prev">
+                                <i class="fas fa-arrow-left"></i> Previous
+                            </button>
+                            <button type="submit" class="btn-next">
+                                Create Account <i class="fas fa-arrow-right"></i>
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -316,7 +325,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             setupPasswordToggle(document.getElementById('togglePassword1'), 'password');
             setupPasswordToggle(document.getElementById('togglePassword2'), 'confirm-password');
+
+            // Multi-step form functionality
+            const nextButtons = document.querySelectorAll('.btn-next:not(.toggle-password)');
+            const prevButtons = document.querySelectorAll('.btn-prev');
+            const formPages = document.querySelectorAll('.form-pages');
+            let currentPage = 0;
+
+            // Initialize form - show first page
+            showPage(currentPage);
+
+            // Next button event listeners
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Check if this is the submit button on the last page
+                    if (this.type === 'submit') {
+                        // This is the submit button on the last page, let form submit normally
+                        // But first validate the age group selection
+                        if (!document.getElementById('age-group').value.trim()) {
+                            alert('Please select your age group.');
+                            e.preventDefault();
+                            return false;
+                        }
+                        return true; // Allow form submission
+                    }
+
+                    // Validate current page before proceeding
+                    if (validateCurrentPage(currentPage)) {
+                        currentPage++;
+                        showPage(currentPage);
+                    }
+                });
+            });
+
+            // Previous button event listeners
+            prevButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    currentPage--;
+                    showPage(currentPage);
+                });
+            });
+
+            // Age group selection
+            const ageOptions = document.querySelectorAll('.age-option');
+            const ageGroupInput = document.getElementById('age-group');
+
+            ageOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    ageOptions.forEach(opt => opt.classList.remove('selected'));
+
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+
+                    // Set the hidden input value
+                    const ageValue = this.getAttribute('data-age');
+                    ageGroupInput.value = ageValue;
+                });
+            });
         });
+
+        function showPage(pageIndex) {
+            // Hide all pages
+            document.querySelectorAll('.form-pages').forEach((page, index) => {
+                if (index === pageIndex) {
+                    page.style.display = 'block';
+                } else {
+                    page.style.display = 'none';
+                }
+            });
+        }
+
+        function validateCurrentPage(pageIndex) {
+            const currentPageElement = document.querySelectorAll('.form-pages')[pageIndex];
+            const requiredFields = currentPageElement.querySelectorAll('[required]');
+
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    // Highlight the field as invalid (optional)
+                    field.style.borderColor = '#ff6b6b';
+                } else {
+                    // Reset border color if it was highlighted
+                    field.style.borderColor = '';
+                }
+            });
+
+            // Special validation for age group - only when moving from page 0 to 1
+            if (pageIndex === 0) { // If we're validating the first page before going to second
+                const ageGroupInput = document.getElementById('age-group');
+                if (!ageGroupInput.value.trim()) {
+                    isValid = false;
+                    alert('Please select your age group.');
+                }
+            }
+
+            return isValid;
+        }
 
         function toggleAdminField() {
             const adminField = document.getElementById('admin-secret-field');
