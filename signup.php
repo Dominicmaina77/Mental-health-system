@@ -181,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="form-navigation">
                             <div></div>
-                            <button type="button" class="btn-next">
+                            <button type="button" class="btn-next" onclick="goToStep(1)">
                                 Next <i class="fas fa-arrow-right"></i>
                             </button>
                         </div>
@@ -238,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="form-navigation">
-                            <button type="button" class="btn-prev">
+                            <button type="button" class="btn-prev" onclick="goToStep(0)">
                                 <i class="fas fa-arrow-left"></i> Previous
                             </button>
                             <button type="submit" class="btn-next">
@@ -301,6 +301,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </footer>
 
     <script>
+        // Global variable to track current page
+        let currentPage = 0;
+
         // Password toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
             function setupPasswordToggle(toggleBtn, inputId) {
@@ -326,45 +329,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setupPasswordToggle(document.getElementById('togglePassword1'), 'password');
             setupPasswordToggle(document.getElementById('togglePassword2'), 'confirm-password');
 
-            // Multi-step form functionality
-            const nextButtons = document.querySelectorAll('.btn-next:not(.toggle-password)');
-            const prevButtons = document.querySelectorAll('.btn-prev');
-            const formPages = document.querySelectorAll('.form-pages');
-            let currentPage = 0;
-
             // Initialize form - show first page
             showPage(currentPage);
-
-            // Next button event listeners
-            nextButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    // Check if this is the submit button on the last page
-                    if (this.type === 'submit') {
-                        // This is the submit button on the last page, let form submit normally
-                        // But first validate the age group selection
-                        if (!document.getElementById('age-group').value.trim()) {
-                            alert('Please select your age group.');
-                            e.preventDefault();
-                            return false;
-                        }
-                        return true; // Allow form submission
-                    }
-
-                    // Validate current page before proceeding
-                    if (validateCurrentPage(currentPage)) {
-                        currentPage++;
-                        showPage(currentPage);
-                    }
-                });
-            });
-
-            // Previous button event listeners
-            prevButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    currentPage--;
-                    showPage(currentPage);
-                });
-            });
 
             // Age group selection
             const ageOptions = document.querySelectorAll('.age-option');
@@ -385,6 +351,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         });
 
+        // Function to navigate to a specific step
+        function goToStep(stepIndex) {
+            // Validate current page before proceeding
+            if (currentPage === 0) { // If we're on the first page and going to second
+                if (!validateStepOne()) {
+                    return false;
+                }
+            }
+
+            currentPage = stepIndex;
+            showPage(currentPage);
+        }
+
         function showPage(pageIndex) {
             // Hide all pages
             document.querySelectorAll('.form-pages').forEach((page, index) => {
@@ -396,33 +375,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
 
-        function validateCurrentPage(pageIndex) {
-            const currentPageElement = document.querySelectorAll('.form-pages')[pageIndex];
-            const requiredFields = currentPageElement.querySelectorAll('[required]');
+        function validateStepOne() {
+            // Get all required fields from step 1
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const confirmPassword = document.getElementById('confirm-password').value.trim();
+            const terms = document.getElementById('terms');
 
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    // Highlight the field as invalid (optional)
-                    field.style.borderColor = '#ff6b6b';
-                } else {
-                    // Reset border color if it was highlighted
-                    field.style.borderColor = '';
-                }
-            });
-
-            // Special validation for age group - only when moving from page 0 to 1
-            if (pageIndex === 0) { // If we're validating the first page before going to second
-                const ageGroupInput = document.getElementById('age-group');
-                if (!ageGroupInput.value.trim()) {
-                    isValid = false;
-                    alert('Please select your age group.');
-                }
+            // Basic validation
+            if (!name || !email || !password || !confirmPassword) {
+                alert('Please fill in all required fields.');
+                return false;
             }
 
-            return isValid;
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                return false;
+            }
+
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters long.');
+                return false;
+            }
+
+            if (!terms.checked) {
+                alert('You must agree to the Terms of Service and Privacy Policy.');
+                return false;
+            }
+
+            return true;
         }
 
         function toggleAdminField() {
