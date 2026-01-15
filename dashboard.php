@@ -589,21 +589,20 @@ $privacyScore = 100;
                 <div class="dashboard-card reminders">
                     <h3><i class="fas fa-bell"></i> Upcoming Reminders</h3>
                     <div class="reminder-list">
-                        <div class="reminder-item">
-                            <div class="reminder-time">6:00 PM</div>
-                            <div class="reminder-title">Evening Mood Check-in</div>
-                            <i class="fas fa-check-circle" style="color: var(--medium-blue); cursor: pointer;"></i>
-                        </div>
-                        <div class="reminder-item">
-                            <div class="reminder-time">8:00 AM</div>
-                            <div class="reminder-title">Morning Gratitude Journal</div>
-                            <i class="fas fa-check-circle" style="color: var(--medium-blue); cursor: pointer;"></i>
-                        </div>
-                        <div class="reminder-item">
-                            <div class="reminder-time">10:00 PM</div>
-                            <div class="reminder-title">Bedtime Breathing Exercise</div>
-                            <i class="fas fa-check-circle" style="color: var(--medium-blue); cursor: pointer;"></i>
-                        </div>
+                        <?php if (!empty($activeReminders)): ?>
+                            <?php foreach ($activeReminders as $rem): ?>
+                                <div class="reminder-item">
+                                    <div class="reminder-time"><?php echo date('g:i A', strtotime($rem['reminder_time'])); ?></div>
+                                    <div class="reminder-title"><?php echo htmlspecialchars($rem['title']); ?></div>
+                                    <i class="fas fa-check-circle" style="color: var(--medium-blue); cursor: pointer;" title="Mark as completed"></i>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="reminder-item">
+                                <div class="reminder-title">No active reminders</div>
+                                <div class="reminder-time">-</div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="view-all">
                         <a href="reminders.php">Manage Reminders <i class="fas fa-arrow-right"></i></a>
