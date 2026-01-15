@@ -145,7 +145,25 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Comparison Charts Section -->
+            <h3>Comparison Views</h3>
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3>Week-over-Week Comparison</h3>
+                    <div class="chart-container">
+                        <canvas id="weekOverWeekChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Month-over-Month Comparison</h3>
+                    <div class="chart-container">
+                        <canvas id="monthOverMonthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <h3>Monthly Mood Heatmap</h3>
             <div class="heatmap">
                 <!-- This would be generated dynamically -->
@@ -569,6 +587,122 @@
                 return labels[value] || 'Neutral';
             }
 
+            // Function to create week-over-week comparison chart
+            function createWeekOverWeekChart(data) {
+                const ctx = document.getElementById('weekOverWeekChart').getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (window.weekOverWeekChart) {
+                    window.weekOverWeekChart.destroy();
+                }
+
+                // Sample data for demonstration - in a real app, this would come from the API
+                const weeks = ['Prev Week', 'This Week'];
+                const avgMoods = [6.2, 7.1]; // Average mood for each period
+
+                window.weekOverWeekChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: weeks,
+                        datasets: [{
+                            label: 'Average Mood',
+                            data: avgMoods,
+                            backgroundColor: [
+                                'rgba(255, 118, 117, 0.5)', // Red for previous week if lower
+                                avgMoods[1] > avgMoods[0] ? 'rgba(0, 184, 148, 0.5)' : 'rgba(253, 203, 110, 0.5)' // Green if improvement, yellow if decline
+                            ],
+                            borderColor: [
+                                'rgba(255, 118, 117, 1)',
+                                avgMoods[1] > avgMoods[0] ? 'rgba(0, 184, 148, 1)' : 'rgba(253, 203, 110, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: 1,
+                                max: 10,
+                                title: {
+                                    display: true,
+                                    text: 'Average Mood (1-10)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Avg Mood: ${context.parsed.y}/10`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Function to create month-over-month comparison chart
+            function createMonthOverMonthChart(data) {
+                const ctx = document.getElementById('monthOverMonthChart').getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (window.monthOverMonthChart) {
+                    window.monthOverMonthChart.destroy();
+                }
+
+                // Sample data for demonstration - in a real app, this would come from the API
+                const months = ['Prev Month', 'This Month'];
+                const avgMoods = [6.8, 7.4]; // Average mood for each period
+
+                window.monthOverMonthChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Average Mood',
+                            data: avgMoods,
+                            backgroundColor: [
+                                'rgba(255, 118, 117, 0.5)', // Red for previous month if lower
+                                avgMoods[1] > avgMoods[0] ? 'rgba(0, 184, 148, 0.5)' : 'rgba(253, 203, 110, 0.5)' // Green if improvement, yellow if decline
+                            ],
+                            borderColor: [
+                                'rgba(255, 118, 117, 1)',
+                                avgMoods[1] > avgMoods[0] ? 'rgba(0, 184, 148, 1)' : 'rgba(253, 203, 110, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: 1,
+                                max: 10,
+                                title: {
+                                    display: true,
+                                    text: 'Average Mood (1-10)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Avg Mood: ${context.parsed.y}/10`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
             // Add event listeners for filter controls
             document.getElementById('date-range').addEventListener('change', function() {
                 loadInsightsData(parseInt(this.value));
@@ -581,6 +715,11 @@
 
             // Initialize insights data
             loadInsightsData();
+
+            // Initialize comparison charts
+            // In a real implementation, these would be populated with actual data from the API
+            createWeekOverWeekChart([]);
+            createMonthOverMonthChart([]);
         });
     </script>
 </body>
