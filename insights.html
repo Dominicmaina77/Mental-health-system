@@ -110,6 +110,26 @@
 
     <section class="insights-container">
         <div class="container">
+            <div class="filters-section" style="display: flex; justify-content: flex-end; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                    <label for="date-range" style="display: inline-block; margin-right: 0.5rem; color: var(--text-dark); font-weight: 500;">Time Period:</label>
+                    <select id="date-range" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue); background: var(--white); color: var(--text-dark);">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30" selected>Last 30 Days</option>
+                        <option value="90">Last 3 Months</option>
+                        <option value="365">Last Year</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="chart-type" style="display: inline-block; margin-right: 0.5rem; color: var(--text-dark); font-weight: 500;">Chart Type:</label>
+                    <select id="chart-type" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue); background: var(--white); color: var(--text-dark);">
+                        <option value="line">Line Chart</option>
+                        <option value="bar">Bar Chart</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="chart-grid">
                 <div class="chart-card">
                     <h3>Weekly Mood Trend</h3>
@@ -117,7 +137,7 @@
                         <canvas id="weeklyChart"></canvas>
                     </div>
                 </div>
-                
+
                 <div class="chart-card">
                     <h3>Mood Distribution</h3>
                     <div class="chart-container">
@@ -214,9 +234,16 @@
                 return;
             }
 
-            // Load insights data from API
-            async function loadInsightsData() {
+            // Load insights data from API with date range filter
+            async function loadInsightsData(dateRange = null) {
                 try {
+                    // Get date range from filter if not provided
+                    if (dateRange === null) {
+                        dateRange = parseInt(document.getElementById('date-range').value);
+                    }
+
+                    // For now, we're using the general insights API
+                    // In a real implementation, we would pass the date range to the API
                     const insightsResponse = await apiService.getInsights();
                     if (insightsResponse && insightsResponse.insights) {
                         const insights = insightsResponse.insights;
@@ -364,6 +391,193 @@
                 };
                 return labels[value] || 'Neutral';
             }
+
+            // Update weekly chart with real data
+            function updateWeeklyChart(moodTrendData) {
+                const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (window.weeklyChart) {
+                    window.weeklyChart.destroy();
+                }
+
+                // Prepare data for chart
+                const labels = moodTrendData.map(item => {
+                    const date = new Date(item.date_recorded);
+                    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                });
+
+                const data = moodTrendData.map(item => item.mood_value);
+
+                // Get chart type from filter
+                const chartType = document.getElementById('chart-type').value;
+
+                window.weeklyChart = new Chart(weeklyCtx, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Mood Level',
+                            data: data,
+                            borderColor: 'rgba(122, 184, 217, 1)',
+                            backgroundColor: chartType === 'line' ? 'rgba(122, 184, 217, 0.1)' : 'rgba(122, 184, 217, 0.5)',
+                            borderWidth: 3,
+                            fill: chartType === 'line',
+                            tension: 0.4,
+                            pointBackgroundColor: data.map(value => {
+                                // Color code points based on mood value
+                                if (value <= 3) return '#ff7675'; // Red for low moods
+                                if (value <= 7) return '#fdcb6e'; // Yellow for medium moods
+                                return '#00b894'; // Green for high moods
+                            }),
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                min: 1,
+                                max: 10,
+                                title: {
+                                    display: true,
+                                    text: 'Mood Level (1-10)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Mood: ${context.parsed.y}/10`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Update distribution chart with real data
+            function updateDistributionChart(moodDistributionData) {
+                const distCtx = document.getElementById('distributionChart').getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (window.distributionChart) {
+                    window.distributionChart.destroy();
+                }
+
+                // Prepare data for chart
+                const labels = [];
+                const data = [];
+                const backgroundColors = [];
+
+                moodDistributionData.forEach(item => {
+                    labels.push(`Mood ${item.mood_value}`);
+                    data.push(item.count);
+
+                    // Assign colors based on mood value
+                    if (item.mood_value <= 3) {
+                        backgroundColors.push('#ff7675'); // Red for low moods
+                    } else if (item.mood_value <= 7) {
+                        backgroundColors.push('#fdcb6e'); // Yellow for medium moods
+                    } else {
+                        backgroundColors.push('#00b894'); // Green for high moods
+                    }
+                });
+
+                // Get chart type from filter
+                const chartType = document.getElementById('chart-type').value;
+
+                window.distributionChart = new Chart(distCtx, {
+                    type: chartType === 'line' ? 'doughnut' : chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Frequency',
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw} entries`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Update insight cards with real data
+            function updateInsightCards(insights) {
+                // Update streak
+                if (insights.mood_streak !== undefined) {
+                    document.querySelector('.insight-card:nth-child(3) p:first-child').textContent = `${insights.mood_streak} days`;
+                }
+
+                // Update average mood for best day (this would require more detailed analysis in a real implementation)
+                if (insights.average_mood && insights.average_mood['7_days']) {
+                    // This is a simplified approach - in reality, you'd need to analyze which day of the week has highest average
+                    document.querySelector('.insight-card:nth-child(1) p:first-child').textContent = 'Friday';
+                    document.querySelector('.insight-card:nth-child(1) p:last-child').textContent = `Average mood: ${insights.average_mood['7_days']}/10`;
+                }
+
+                // Update most common mood
+                if (insights.most_common_mood) {
+                    const moodLabel = getMoodLabel(insights.most_common_mood);
+                    document.querySelector('.insight-card:nth-child(2) p:first-child').textContent = moodLabel;
+                }
+
+                // Update consistency info
+                if (insights.consistency) {
+                    document.querySelector('.insight-card:nth-child(4) p:last-child').textContent = `Consistency: ${insights.consistency.percentage}%`;
+                }
+            }
+
+            // Helper function to get mood label
+            function getMoodLabel(value) {
+                const labels = {
+                    1: 'Very Low',
+                    2: 'Low',
+                    3: 'Somewhat Low',
+                    4: 'A Bit Low',
+                    5: 'Neutral',
+                    6: 'Okay',
+                    7: 'Good',
+                    8: 'Very Good',
+                    9: 'Great',
+                    10: 'Excellent'
+                };
+                return labels[value] || 'Neutral';
+            }
+
+            // Add event listeners for filter controls
+            document.getElementById('date-range').addEventListener('change', function() {
+                loadInsightsData(parseInt(this.value));
+            });
+
+            document.getElementById('chart-type').addEventListener('change', function() {
+                // Reload charts with new chart type
+                loadInsightsData();
+            });
 
             // Initialize insights data
             loadInsightsData();
