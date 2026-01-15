@@ -204,10 +204,11 @@ class MoodEntry {
         $query = "SELECT AVG(mood_value) as avg_mood FROM " . $this->table . " 
                   WHERE user_id = :user_id 
                   AND date_recorded >= DATE_SUB(:current_date, INTERVAL :days DAY)";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':current_date', getCurrentDate());
+        $currentDate = getCurrentDate();
+        $stmt->bindParam(':current_date', $currentDate);
         $stmt->bindParam(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -224,10 +225,11 @@ class MoodEntry {
                   AND date_recorded >= DATE_SUB(:current_date, INTERVAL :days DAY)
                   GROUP BY mood_value 
                   ORDER BY mood_value";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':current_date', getCurrentDate());
+        $currentDate = getCurrentDate();
+        $stmt->bindParam(':current_date', $currentDate);
         $stmt->bindParam(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -245,7 +247,8 @@ class MoodEntry {
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':current_date', getCurrentDate());
+        $currentDate = getCurrentDate();
+        $stmt->bindParam(':current_date', $currentDate);
         $stmt->execute();
 
         $dates = $stmt->fetchAll(PDO::FETCH_COLUMN);

@@ -210,7 +210,8 @@ class JournalEntry {
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':current_date', getCurrentTimestamp());
+        $currentDate = getCurrentTimestamp();
+        $stmt->bindParam(':current_date', $currentDate);
         $stmt->bindParam(':days', $days, PDO::PARAM_INT);
         $stmt->execute();
 

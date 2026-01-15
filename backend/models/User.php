@@ -196,7 +196,8 @@ class User {
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(':is_active', $isActive, PDO::PARAM_INT);
-        $stmt->bindParam(':updated_at', getCurrentTimestamp());
+        $updatedAt = getCurrentTimestamp();
+        $stmt->bindParam(':updated_at', $updatedAt);
         $stmt->bindParam(':id', $userId);
 
         if($stmt->execute()) {
@@ -221,7 +222,8 @@ class User {
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(':role', $role);
-        $stmt->bindParam(':updated_at', getCurrentTimestamp());
+        $updatedAt = getCurrentTimestamp();
+        $stmt->bindParam(':updated_at', $updatedAt);
         $stmt->bindParam(':id', $userId);
 
         if($stmt->execute()) {

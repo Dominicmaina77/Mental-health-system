@@ -287,18 +287,84 @@
                     // For now, we're using the general insights API
                     // In a real implementation, we would pass these parameters to the API
                     const insightsResponse = await apiService.getInsights();
+
+                    console.log('Insights API Response:', insightsResponse); // Debug log
+
                     if (insightsResponse && insightsResponse.insights) {
                         const insights = insightsResponse.insights;
 
+                        console.log('Mood trend data:', insights.mood_trend?.data); // Debug log
+                        console.log('Mood distribution data:', insights.mood_distribution); // Debug log
+
                         // Update charts with real data
-                        updateWeeklyChart(insights.mood_trend.data);
-                        updateDistributionChart(insights.mood_distribution);
+                        if (insights.mood_trend && insights.mood_trend.data && Array.isArray(insights.mood_trend.data) && insights.mood_trend.data.length > 0) {
+                            updateWeeklyChart(insights.mood_trend.data);
+                        } else {
+                            console.warn('No mood trend data available');
+                            // Show a message to the user without replacing the canvas
+                            const weeklyChartCanvas = document.getElementById('weeklyChart');
+                            if (weeklyChartCanvas) {
+                                const ctx = weeklyChartCanvas.getContext('2d');
+                                ctx.clearRect(0, 0, weeklyChartCanvas.width, weeklyChartCanvas.height);
+                                ctx.font = "14px Arial";
+                                ctx.fillStyle = "#95a5a6";
+                                ctx.textAlign = "center";
+                                ctx.fillText("No mood trend data available. Start tracking your mood!", weeklyChartCanvas.width/2, weeklyChartCanvas.height/2);
+                            }
+                        }
+
+                        if (insights.mood_distribution && Array.isArray(insights.mood_distribution) && insights.mood_distribution.length > 0) {
+                            updateDistributionChart(insights.mood_distribution);
+                        } else {
+                            console.warn('No mood distribution data available');
+                            // Show a message to the user without replacing the canvas
+                            const distributionChartCanvas = document.getElementById('distributionChart');
+                            if (distributionChartCanvas) {
+                                const ctx = distributionChartCanvas.getContext('2d');
+                                ctx.clearRect(0, 0, distributionChartCanvas.width, distributionChartCanvas.height);
+                                ctx.font = "14px Arial";
+                                ctx.fillStyle = "#95a5a6";
+                                ctx.textAlign = "center";
+                                ctx.fillText("No mood distribution data available. Start tracking your mood!", distributionChartCanvas.width/2, distributionChartCanvas.height/2);
+                            }
+                        }
 
                         // Update insight cards with real data
                         updateInsightCards(insights);
+
+                        // Initialize comparison charts after main data is loaded
+                        createWeekOverWeekChart([]);
+                        createMonthOverMonthChart([]);
+                    } else {
+                        console.error('No insights data returned from API');
                     }
                 } catch (error) {
                     console.error('Error loading insights data:', error);
+                    // Show error messages on the charts without destroying the canvas elements
+                    const weeklyChartCanvas = document.getElementById('weeklyChart');
+                    const distributionChartCanvas = document.getElementById('distributionChart');
+
+                    if (weeklyChartCanvas) {
+                        const ctx = weeklyChartCanvas.getContext('2d');
+                        ctx.clearRect(0, 0, weeklyChartCanvas.width, weeklyChartCanvas.height);
+                        ctx.font = "14px Arial";
+                        ctx.fillStyle = "#e74c3c";
+                        ctx.textAlign = "center";
+                        ctx.fillText("Error loading mood trend data. Please try again later.", weeklyChartCanvas.width/2, weeklyChartCanvas.height/2);
+                    }
+
+                    if (distributionChartCanvas) {
+                        const ctx = distributionChartCanvas.getContext('2d');
+                        ctx.clearRect(0, 0, distributionChartCanvas.width, distributionChartCanvas.height);
+                        ctx.font = "14px Arial";
+                        ctx.fillStyle = "#e74c3c";
+                        ctx.textAlign = "center";
+                        ctx.fillText("Error loading mood distribution data. Please try again later.", distributionChartCanvas.width/2, distributionChartCanvas.height/2);
+                    }
+
+                    // Also initialize comparison charts with error state
+                    createWeekOverWeekChart([]);
+                    createMonthOverMonthChart([]);
                 }
             }
 
@@ -307,7 +373,7 @@
                 const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
 
                 // Destroy existing chart if it exists
-                if (window.weeklyChart) {
+                if (window.weeklyChart && typeof window.weeklyChart.destroy === 'function') {
                     window.weeklyChart.destroy();
                 }
 
@@ -349,7 +415,7 @@
                 const distCtx = document.getElementById('distributionChart').getContext('2d');
 
                 // Destroy existing chart if it exists
-                if (window.distributionChart) {
+                if (window.distributionChart && typeof window.distributionChart.destroy === 'function') {
                     window.distributionChart.destroy();
                 }
 
@@ -359,16 +425,20 @@
                 const backgroundColors = [];
 
                 moodDistributionData.forEach(item => {
-                    labels.push(`Mood ${item.mood_value}`);
-                    data.push(item.count);
+                    try {
+                        labels.push(`Mood ${item.mood_value}`);
+                        data.push(item.count);
 
-                    // Assign colors based on mood value
-                    if (item.mood_value <= 3) {
-                        backgroundColors.push('#ff7675'); // Red for low moods
-                    } else if (item.mood_value <= 7) {
-                        backgroundColors.push('#fdcb6e'); // Yellow for medium moods
-                    } else {
-                        backgroundColors.push('#00b894'); // Green for high moods
+                        // Assign colors based on mood value
+                        if (item.mood_value <= 3) {
+                            backgroundColors.push('#ff7675'); // Red for low moods
+                        } else if (item.mood_value <= 7) {
+                            backgroundColors.push('#fdcb6e'); // Yellow for medium moods
+                        } else {
+                            backgroundColors.push('#00b894'); // Green for high moods
+                        }
+                    } catch (e) {
+                        console.error('Error processing mood distribution data:', item, e);
                     }
                 });
 
@@ -439,14 +509,19 @@
                 const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
 
                 // Destroy existing chart if it exists
-                if (window.weeklyChart) {
+                if (window.weeklyChart && typeof window.weeklyChart.destroy === 'function') {
                     window.weeklyChart.destroy();
                 }
 
                 // Prepare data for chart
                 const labels = moodTrendData.map(item => {
-                    const date = new Date(item.date_recorded);
-                    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    try {
+                        const date = new Date(item.date_recorded);
+                        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    } catch (e) {
+                        console.error('Error parsing date:', item.date_recorded, e);
+                        return item.date_recorded; // Fallback to raw date string
+                    }
                 });
 
                 const data = moodTrendData.map(item => item.mood_value);
@@ -514,7 +589,7 @@
                 const distCtx = document.getElementById('distributionChart').getContext('2d');
 
                 // Destroy existing chart if it exists
-                if (window.distributionChart) {
+                if (window.distributionChart && typeof window.distributionChart.destroy === 'function') {
                     window.distributionChart.destroy();
                 }
 
@@ -524,24 +599,30 @@
                 const backgroundColors = [];
 
                 moodDistributionData.forEach(item => {
-                    labels.push(`Mood ${item.mood_value}`);
-                    data.push(item.count);
+                    try {
+                        labels.push(`Mood ${item.mood_value}`);
+                        data.push(item.count);
 
-                    // Assign colors based on mood value
-                    if (item.mood_value <= 3) {
-                        backgroundColors.push('#ff7675'); // Red for low moods
-                    } else if (item.mood_value <= 7) {
-                        backgroundColors.push('#fdcb6e'); // Yellow for medium moods
-                    } else {
-                        backgroundColors.push('#00b894'); // Green for high moods
+                        // Assign colors based on mood value
+                        if (item.mood_value <= 3) {
+                            backgroundColors.push('#ff7675'); // Red for low moods
+                        } else if (item.mood_value <= 7) {
+                            backgroundColors.push('#fdcb6e'); // Yellow for medium moods
+                        } else {
+                            backgroundColors.push('#00b894'); // Green for high moods
+                        }
+                    } catch (e) {
+                        console.error('Error processing mood distribution data:', item, e);
                     }
                 });
 
+                // For distribution chart, always use doughnut or pie regardless of the filter
                 // Get chart type from filter
                 const chartType = document.getElementById('chart-type').value;
+                const distributionChartType = chartType === 'bar' ? 'bar' : 'doughnut';
 
                 window.distributionChart = new Chart(distCtx, {
-                    type: chartType === 'line' ? 'doughnut' : chartType,
+                    type: distributionChartType,
                     data: {
                         labels: labels,
                         datasets: [{
@@ -616,7 +697,7 @@
                 const ctx = document.getElementById('weekOverWeekChart').getContext('2d');
 
                 // Destroy existing chart if it exists
-                if (window.weekOverWeekChart) {
+                if (window.weekOverWeekChart && typeof window.weekOverWeekChart.destroy === 'function') {
                     window.weekOverWeekChart.destroy();
                 }
 
@@ -674,7 +755,7 @@
                 const ctx = document.getElementById('monthOverMonthChart').getContext('2d');
 
                 // Destroy existing chart if it exists
-                if (window.monthOverMonthChart) {
+                if (window.monthOverMonthChart && typeof window.monthOverMonthChart.destroy === 'function') {
                     window.monthOverMonthChart.destroy();
                 }
 
@@ -752,11 +833,6 @@
 
             // Initialize insights data
             loadInsightsData();
-
-            // Initialize comparison charts
-            // In a real implementation, these would be populated with actual data from the API
-            createWeekOverWeekChart([]);
-            createMonthOverMonthChart([]);
         });
     </script>
 </body>

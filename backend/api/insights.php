@@ -59,7 +59,8 @@ function getInsights($db, $userId) {
                    ORDER BY date_recorded ASC";
     $trendStmt = $db->prepare($trendQuery);
     $trendStmt->bindParam(':user_id', $userId);
-    $trendStmt->bindParam(':current_date', getCurrentDate());
+    $currentDate = getCurrentDate();
+    $trendStmt->bindParam(':current_date', $currentDate);
     $trendStmt->execute();
     $moodTrend = $trendStmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -83,7 +84,8 @@ function getInsights($db, $userId) {
                          AND date_recorded >= DATE_SUB(:current_date, INTERVAL 7 DAY)";
     $consistencyStmt = $db->prepare($consistencyQuery);
     $consistencyStmt->bindParam(':user_id', $userId);
-    $consistencyStmt->bindParam(':current_date', getCurrentDate());
+    $currentDate = getCurrentDate();
+    $consistencyStmt->bindParam(':current_date', $currentDate);
     $consistencyStmt->execute();
     $daysWithEntries = $consistencyStmt->fetch(PDO::FETCH_ASSOC)['days_with_entries'];
     $consistencyPercentage = round(($daysWithEntries / 7) * 100);
@@ -97,7 +99,8 @@ function getInsights($db, $userId) {
                         LIMIT 1";
     $commonMoodStmt = $db->prepare($commonMoodQuery);
     $commonMoodStmt->bindParam(':user_id', $userId);
-    $commonMoodStmt->bindParam(':current_date', getCurrentDate());
+    $currentDate = getCurrentDate();
+    $commonMoodStmt->bindParam(':current_date', $currentDate);
     $commonMoodStmt->execute();
     $commonMood = $commonMoodStmt->fetch(PDO::FETCH_ASSOC);
     
