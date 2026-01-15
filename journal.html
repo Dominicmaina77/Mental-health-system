@@ -31,11 +31,45 @@
             }
         }
         
-        .editor-section, .entries-section {
+        .editor-section {
             background-color: var(--light-blue);
             padding: 2rem;
             border-radius: var(--radius);
             box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .entries-section {
+            background-color: var(--light-blue);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 5px 15px var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .entries-container {
+            max-height: 500px; /* Set a max height for scrolling */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding-right: 10px; /* Space for scrollbar */
+        }
+
+        /* Custom scrollbar styling */
+        .entries-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .entries-container::-webkit-scrollbar-track {
+            background: var(--pastel-blue);
+            border-radius: 4px;
+        }
+
+        .entries-container::-webkit-scrollbar-thumb {
+            background: var(--medium-blue);
+            border-radius: 4px;
+        }
+
+        .entries-container::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-blue);
         }
         
         .form-control {
@@ -178,7 +212,8 @@
                 
                 <div class="entries-section">
                     <h3>Recent Entries 📚</h3>
-                    <div class="journal-entries">
+                    <div class="entries-container">
+                        <div class="journal-entries">
                         <div class="journal-entry" data-entry-id="1">
                             <div class="entry-header">
                                 <strong>Today's Reflection</strong>
@@ -412,6 +447,10 @@
                     if (response && response.journal_entry) {
                         const entry = response.journal_entry;
 
+                        // Clear the editor first
+                        document.getElementById('entry-title').value = '';
+                        document.getElementById('entry-content').value = '';
+
                         // Populate the editor with the entry data
                         document.getElementById('entry-title').value = entry.title || '';
                         document.getElementById('entry-content').value = entry.content || '';
@@ -467,9 +506,19 @@
                             saveNewEntry();
                         };
 
-                        // Reload entries to show the updated one
-                        loadJournalEntries();
-                        loadJournalStats();
+                        // Update the specific entry in the list instead of reloading all entries
+                        const entryElement = document.querySelector(`.journal-entry[data-entry-id="${entryId}"]`);
+                        if (entryElement) {
+                            // Update the content of the existing entry
+                            const titleElement = entryElement.querySelector('.entry-header strong');
+                            const contentElement = entryElement.querySelector('p');
+
+                            titleElement.textContent = title || 'Untitled Entry';
+                            contentElement.textContent = content.substring(0, 150) +
+                                (content.length > 150 ? '...' : '');
+                        }
+
+                        loadJournalStats(); // Update stats after update
                     } else {
                         alert(response.error || 'Failed to update entry. Please try again.');
                     }
@@ -477,7 +526,10 @@
                     console.error('Error updating journal entry:', error);
                     alert(error.message || 'An error occurred while updating your entry. Please try again.');
                 } finally {
-                    btn.innerHTML = '<i class="fas fa-sync-alt"></i> Update Entry';
+                    btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
+                    btn.onclick = function() {
+                        saveNewEntry();
+                    };
                     btn.disabled = false;
                 }
             }
