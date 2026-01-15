@@ -671,11 +671,43 @@ $privacyScore = 100;
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
 
+            // Get mood data from PHP
+            <?php
+            // Get mood entries for the last 7 days
+            $sevenDaysAgo = date('Y-m-d', strtotime('-6 days'));
+            $today = date('Y-m-d');
+            $moodEntries = $moodEntry->getByUserAndDateRange($_SESSION['user_id'], $sevenDaysAgo, $today);
+
+            // Prepare data for chart
+            $chartData = [];
+            $chartLabels = [];
+
+            // Create an array with dates for the last 7 days
+            for ($i = 6; $i >= 0; $i--) {
+                $date = date('Y-m-d', strtotime("-$i days"));
+                $found = false;
+
+                foreach ($moodEntries as $entry) {
+                    if ($entry['date_recorded'] == $date) {
+                        $chartData[] = $entry['mood_value'];
+                        $chartLabels[] = date('D', strtotime($date));
+                        $found = true;
+                        break;
+                    }
+                }
+
+                if (!$found) {
+                    $chartData[] = null; // No data for this day
+                    $chartLabels[] = date('D', strtotime($date));
+                }
+            }
+            ?>
+
             // Weekly Mood Chart
             const weeklyCtx = document.getElementById('weeklyMoodChart')?.getContext('2d');
             if (weeklyCtx) {
-                const weeklyLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                const weeklyData = [6, 7, 5, 8, 7, 9, 8];
+                const weeklyLabels = <?php echo json_encode($chartLabels); ?>;
+                const weeklyData = <?php echo json_encode($chartData); ?>;
 
                 new Chart(weeklyCtx, {
                     type: 'line',
@@ -689,7 +721,12 @@ $privacyScore = 100;
                             borderWidth: 3,
                             fill: true,
                             tension: 0.4,
-                            pointBackgroundColor: 'rgba(74, 140, 179, 1)',
+                            pointBackgroundColor: weeklyData.map(value => {
+                                if (value === null) return 'transparent';
+                                if (value <= 3) return '#ff7675'; // Red for low moods
+                                if (value <= 7) return '#fdcb6e'; // Yellow for medium moods
+                                return '#00b894'; // Green for high moods
+                            }),
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2,
                             pointRadius: 5
@@ -715,6 +752,9 @@ $privacyScore = 100;
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
+                                        if (context.parsed.y === null) {
+                                            return 'No data recorded';
+                                        }
                                         const labels = ['Very Low', 'Low', 'Somewhat Low', 'A Bit Low', 'Neutral', 'Okay', 'Good', 'Very Good', 'Great', 'Excellent'];
                                         const value = Math.round(context.parsed.y);
                                         return `Mood: ${value}/10 - ${labels[value-1] || 'Neutral'}`;
