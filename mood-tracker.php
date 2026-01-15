@@ -327,10 +327,10 @@ $moodStreak = $moodEntry->getMoodStreak($_SESSION['user_id']);
             <ul class="nav-links">
                 <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="mood-tracker.php" class="active">Mood Tracker</a></li>
-                <li><a href="journal.html">Journal</a></li>
-                <li><a href="insights.html">Insights</a></li>
-                <li><a href="reminders.html">Reminders</a></li>
-                <li><a href="profile.html">Profile</a></li>
+                <li><a href="journal.php">Journal</a></li>
+                <li><a href="insights.php">Insights</a></li>
+                <li><a href="reminders.php">Reminders</a></li>
+                <li><a href="profile.php">Profile</a></li>
                 <li><a href="logout.php" class="btn-login">Log Out</a></li>
             </ul>
             <div class="menu-btn">
