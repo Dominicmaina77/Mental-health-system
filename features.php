@@ -1,3 +1,9 @@
+<?php
+session_start();
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']);
+$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,17 +20,17 @@
             background: linear-gradient(135deg, var(--light-blue) 0%, var(--soft-blue) 100%);
             text-align: center;
         }
-        
+
         .page-header h1 {
             color: var(--dark-blue);
             margin-bottom: 1rem;
         }
-        
+
         .features-main {
             padding: 4rem 0;
             background-color: var(--white);
         }
-        
+
         .feature-detail {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -32,24 +38,24 @@
             align-items: center;
             margin-bottom: 4rem;
         }
-        
+
         .feature-detail:nth-child(even) {
             grid-template-columns: 1fr 1fr;
         }
-        
+
         .feature-detail:nth-child(even) .feature-content {
             order: 2;
         }
-        
+
         .feature-detail:nth-child(even) .feature-visual {
             order: 1;
         }
-        
+
         .feature-icon-large {
             font-size: 4rem;
             margin-bottom: 1.5rem;
         }
-        
+
         .feature-visual {
             background-color: var(--light-blue);
             border-radius: var(--radius);
@@ -61,12 +67,12 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .feature-visual img {
             max-width: 100%;
             border-radius: 8px;
         }
-        
+
         .emoji-slider {
             width: 100%;
             padding: 1rem;
@@ -74,13 +80,13 @@
             border-radius: 50px;
             margin: 1rem 0;
         }
-        
+
         .emoji-options {
             display: flex;
             justify-content: space-between;
             margin-top: 1rem;
         }
-        
+
         .emoji-option {
             font-size: 2rem;
             cursor: pointer;
@@ -88,12 +94,12 @@
             padding: 0.5rem;
             border-radius: 50%;
         }
-        
+
         .emoji-option:hover {
             background-color: var(--pastel-blue);
             transform: scale(1.2);
         }
-        
+
         .journal-preview {
             background-color: var(--white);
             padding: 2rem;
@@ -103,26 +109,26 @@
             text-align: left;
             width: 100%;
         }
-        
+
         .journal-date {
             color: var(--medium-blue);
             font-weight: 600;
             margin-bottom: 1rem;
         }
-        
+
         .privacy-section {
             padding: 5rem 0;
             background: linear-gradient(135deg, var(--soft-blue) 0%, var(--light-blue) 100%);
             text-align: center;
         }
-        
+
         .privacy-features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
-        
+
         .privacy-card {
             background-color: var(--white);
             padding: 2rem;
@@ -130,35 +136,35 @@
             text-align: center;
             box-shadow: 0 5px 20px var(--shadow);
         }
-        
+
         .privacy-icon {
             font-size: 2.5rem;
             margin-bottom: 1rem;
             color: var(--medium-blue);
         }
-        
+
         .cta-section {
             padding: 5rem 0;
             background: linear-gradient(135deg, var(--medium-blue) 0%, var(--dark-blue) 100%);
             color: white;
             text-align: center;
         }
-        
+
         .cta-section h2 {
             color: white;
             margin-bottom: 1rem;
         }
-        
+
         @media (max-width: 992px) {
             .feature-detail {
                 grid-template-columns: 1fr;
                 gap: 2rem;
             }
-            
+
             .feature-detail:nth-child(even) {
                 grid-template-columns: 1fr;
             }
-            
+
             .feature-detail:nth-child(even) .feature-content,
             .feature-detail:nth-child(even) .feature-visual {
                 order: 0;
@@ -167,12 +173,6 @@
     </style>
 </head>
 <body>
-<?php
-session_start();
-// Check if user is logged in
-$isLoggedIn = isset($_SESSION['user_id']);
-$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
-?>
 
     <!-- Navigation -->
     <nav class="navbar">

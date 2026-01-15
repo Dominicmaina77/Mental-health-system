@@ -1,3 +1,9 @@
+<?php
+session_start();
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']);
+$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,40 +20,40 @@
             background: linear-gradient(135deg, var(--light-blue) 0%, var(--soft-blue) 100%);
             text-align: center;
         }
-        
+
         .page-header h1 {
             color: var(--dark-blue);
             margin-bottom: 1rem;
         }
-        
+
         .contact-main {
             padding: 4rem 0;
             background-color: var(--white);
         }
-        
+
         .contact-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 3rem;
         }
-        
+
         @media (max-width: 992px) {
             .contact-container {
                 grid-template-columns: 1fr;
             }
         }
-        
+
         .contact-form {
             background-color: var(--light-blue);
             padding: 2.5rem;
             border-radius: var(--radius);
             box-shadow: 0 10px 30px var(--shadow);
         }
-        
+
         .form-group {
             margin-bottom: 1.5rem;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
@@ -57,7 +63,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .form-control {
             width: 100%;
             padding: 0.8rem 1rem;
@@ -68,18 +74,18 @@
             transition: var(--transition);
             background-color: var(--white);
         }
-        
+
         .form-control:focus {
             outline: none;
             border-color: var(--medium-blue);
             box-shadow: 0 0 0 3px rgba(122, 184, 217, 0.2);
         }
-        
+
         textarea.form-control {
             min-height: 150px;
             resize: vertical;
         }
-        
+
         .submit-btn {
             width: 100%;
             padding: 1rem;
@@ -96,17 +102,17 @@
             justify-content: center;
             gap: 0.5rem;
         }
-        
+
         .submit-btn:hover {
             background-color: var(--dark-blue);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(122, 184, 217, 0.3);
         }
-        
+
         .contact-info {
             padding: 2rem;
         }
-        
+
         .info-card {
             background-color: var(--light-blue);
             padding: 2rem;
@@ -115,20 +121,20 @@
             box-shadow: 0 5px 20px var(--shadow);
             text-align: center;
         }
-        
+
         .info-icon {
             font-size: 2.5rem;
             margin-bottom: 1rem;
             color: var(--medium-blue);
         }
-        
+
         .contact-methods {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
-        
+
         .method {
             text-align: center;
             padding: 1.5rem;
@@ -137,27 +143,27 @@
             box-shadow: 0 5px 15px var(--shadow);
             transition: var(--transition);
         }
-        
+
         .method:hover {
             transform: translateY(-5px);
         }
-        
+
         .method-icon {
             font-size: 2rem;
             margin-bottom: 1rem;
             color: var(--medium-blue);
         }
-        
+
         .faq-section {
             padding: 4rem 0;
             background: linear-gradient(135deg, var(--soft-blue) 0%, var(--light-blue) 100%);
         }
-        
+
         .faq-container {
             max-width: 800px;
             margin: 0 auto;
         }
-        
+
         .faq-item {
             background-color: var(--white);
             border-radius: var(--radius);
@@ -165,7 +171,7 @@
             overflow: hidden;
             box-shadow: 0 5px 15px var(--shadow);
         }
-        
+
         .faq-question {
             padding: 1.5rem;
             cursor: pointer;
@@ -175,16 +181,16 @@
             font-weight: 600;
             color: var(--dark-blue);
         }
-        
+
         .faq-question:hover {
             background-color: var(--light-blue);
         }
-        
+
         .faq-icon {
             font-size: 1.5rem;
             color: var(--medium-blue);
         }
-        
+
         .faq-answer {
             padding: 0 1.5rem;
             max-height: 0;
@@ -192,12 +198,12 @@
             transition: max-height 0.3s ease;
             color: var(--text-light);
         }
-        
+
         .faq-answer.active {
             padding: 0 1.5rem 1.5rem;
             max-height: 500px;
         }
-        
+
         .support-response {
             text-align: center;
             margin-top: 3rem;
@@ -206,7 +212,7 @@
             border-radius: var(--radius);
             box-shadow: 0 5px 20px var(--shadow);
         }
-        
+
         .response-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
@@ -215,12 +221,6 @@
     </style>
 </head>
 <body>
-<?php
-session_start();
-// Check if user is logged in
-$isLoggedIn = isset($_SESSION['user_id']);
-$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
-?>
 
     <!-- Navigation -->
     <nav class="navbar">

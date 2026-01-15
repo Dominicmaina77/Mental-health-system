@@ -1,3 +1,9 @@
+<?php
+session_start();
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']);
+$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,31 +20,31 @@
             background: linear-gradient(135deg, var(--light-blue) 0%, var(--soft-blue) 100%);
             text-align: center;
         }
-        
+
         .page-header h1 {
             color: var(--dark-blue);
             margin-bottom: 1rem;
         }
-        
+
         .about-section {
             padding: 4rem 0;
         }
-        
+
         .about-section:nth-child(even) {
             background-color: var(--white);
         }
-        
+
         .about-section:nth-child(odd) {
             background-color: var(--light-blue);
         }
-        
+
         .mission-vision {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin-top: 2rem;
         }
-        
+
         .mission-card, .vision-card {
             background-color: var(--white);
             padding: 2.5rem;
@@ -48,20 +54,20 @@
             border-top: 5px solid var(--accent-pink);
             transition: var(--transition);
         }
-        
+
         .vision-card {
             border-top-color: var(--accent-lavender);
         }
-        
+
         .mission-card:hover, .vision-card:hover {
             transform: translateY(-10px);
         }
-        
+
         .mission-icon, .vision-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
         }
-        
+
         .mission-statement, .vision-statement {
             font-style: italic;
             font-size: 1.3rem;
@@ -70,14 +76,14 @@
             line-height: 1.6;
             padding: 0 1rem;
         }
-        
+
         .why-we-exist {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
-        
+
         .issue-card {
             background-color: var(--white);
             padding: 2rem;
@@ -86,24 +92,24 @@
             box-shadow: 0 5px 20px var(--shadow);
             transition: var(--transition);
         }
-        
+
         .issue-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(122, 184, 217, 0.2);
         }
-        
+
         .issue-icon {
             font-size: 2.5rem;
             margin-bottom: 1rem;
         }
-        
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 2rem;
             margin: 4rem 0;
         }
-        
+
         .stat-item {
             text-align: center;
             padding: 2rem;
@@ -111,7 +117,7 @@
             border-radius: var(--radius);
             box-shadow: 0 5px 20px var(--shadow);
         }
-        
+
         .stat-number {
             font-size: 3rem;
             font-weight: 700;
@@ -119,21 +125,21 @@
             display: block;
             line-height: 1;
         }
-        
+
         .stat-text {
             font-size: 0.9rem;
             color: var(--text-light);
             display: block;
             margin-top: 0.5rem;
         }
-        
+
         .team-values {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
-        
+
         .value-card {
             background-color: var(--white);
             padding: 2rem;
@@ -142,33 +148,33 @@
             box-shadow: 0 5px 20px var(--shadow);
             transition: var(--transition);
         }
-        
+
         .value-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .value-icon {
             font-size: 2.5rem;
             margin-bottom: 1rem;
         }
-        
+
         .cta-section {
             padding: 5rem 0;
             background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-lavender) 100%);
             color: white;
             text-align: center;
         }
-        
+
         .cta-section h2 {
             color: white;
             margin-bottom: 1rem;
         }
-        
+
         @media (max-width: 768px) {
             .mission-statement, .vision-statement {
                 font-size: 1.1rem;
             }
-            
+
             .stat-number {
                 font-size: 2.5rem;
             }
@@ -176,12 +182,6 @@
     </style>
 </head>
 <body>
-<?php
-session_start();
-// Check if user is logged in
-$isLoggedIn = isset($_SESSION['user_id']);
-$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
-?>
 
     <!-- Navigation -->
     <nav class="navbar">

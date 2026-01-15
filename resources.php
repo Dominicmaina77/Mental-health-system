@@ -1,3 +1,9 @@
+<?php
+session_start();
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']);
+$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -215,12 +221,6 @@
     </style>
 </head>
 <body>
-<?php
-session_start();
-// Check if user is logged in
-$isLoggedIn = isset($_SESSION['user_id']);
-$userName = $isLoggedIn ? $_SESSION['user_name'] ?? 'User' : '';
-?>
 
     <!-- Navigation -->
     <nav class="navbar">
