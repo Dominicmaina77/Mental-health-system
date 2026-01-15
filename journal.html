@@ -81,9 +81,33 @@
         .entry-header {
             display: flex;
             justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .entry-actions button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .entry-actions button:hover {
+            background-color: var(--pastel-blue);
+            color: var(--dark-blue);
+        }
+
+        .entry-date {
             margin-bottom: 1rem;
         }
-        
+
         .stats-card {
             background: linear-gradient(135deg, var(--medium-blue) 0%, var(--dark-blue) 100%);
             color: white;
@@ -154,9 +178,19 @@
                 <div class="entries-section">
                     <h3>Recent Entries 📚</h3>
                     <div class="journal-entries">
-                        <div class="journal-entry">
+                        <div class="journal-entry" data-entry-id="1">
                             <div class="entry-header">
                                 <strong>Today's Reflection</strong>
+                                <div class="entry-actions">
+                                    <button class="btn-edit" title="Edit entry">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-delete" title="Delete entry">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="entry-date">
                                 <span style="font-size: 0.9rem; color: var(--text-light);">Today</span>
                             </div>
                             <p>Had a productive day. Feeling optimistic about the future. Practice gratitude for small wins.</p>
@@ -164,10 +198,20 @@
                                 <span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">reflection</span>
                             </div>
                         </div>
-                        
-                        <div class="journal-entry">
+
+                        <div class="journal-entry" data-entry-id="2">
                             <div class="entry-header">
                                 <strong>Weekend Thoughts</strong>
+                                <div class="entry-actions">
+                                    <button class="btn-edit" title="Edit entry">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-delete" title="Delete entry">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="entry-date">
                                 <span style="font-size: 0.9rem; color: var(--text-light);">Nov 12</span>
                             </div>
                             <p>Spent time with friends. Good reminder to balance work and social life.</p>
