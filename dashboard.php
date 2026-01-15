@@ -540,18 +540,33 @@ $privacyScore = 100;
                 <div class="dashboard-card recent-journal">
                     <h3><i class="fas fa-book"></i> Recent Journal Entries</h3>
                     <div class="journal-list">
-                        <div class="journal-item">
-                            <div class="journal-title">Reflecting on progress</div>
-                            <div class="journal-date">Today</div>
-                        </div>
-                        <div class="journal-item">
-                            <div class="journal-title">Weekend thoughts</div>
-                            <div class="journal-date">Nov 12</div>
-                        </div>
-                        <div class="journal-item">
-                            <div class="journal-title">Exam stress management</div>
-                            <div class="journal-date">Nov 10</div>
-                        </div>
+                        <?php if (!empty($recentJournals)): ?>
+                            <?php foreach ($recentJournals as $journal): ?>
+                                <div class="journal-item">
+                                    <div class="journal-title"><?php echo htmlspecialchars($journal['title'] ?: 'Untitled Entry'); ?></div>
+                                    <div class="journal-date">
+                                        <?php
+                                        $date = new DateTime($journal['created_at']);
+                                        $today = new DateTime();
+                                        $yesterday = new DateTime('-1 day');
+
+                                        if ($date->format('Y-m-d') === $today->format('Y-m-d')) {
+                                            echo 'Today';
+                                        } elseif ($date->format('Y-m-d') === $yesterday->format('Y-m-d')) {
+                                            echo 'Yesterday';
+                                        } else {
+                                            echo $date->format('M j');
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="journal-item">
+                                <div class="journal-title">No journal entries yet</div>
+                                <div class="journal-date">-</div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="view-all">
                         <a href="journal.php">View All Entries <i class="fas fa-arrow-right"></i></a>
