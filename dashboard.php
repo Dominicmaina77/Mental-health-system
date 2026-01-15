@@ -10,6 +10,42 @@ if (!isset($_SESSION['user_id'])) {
 
 // Get user information from session
 $user_name = $_SESSION['user_name'] ?? 'User';
+
+// Include necessary files
+require_once 'backend/config/config.php';
+require_once 'backend/includes/functions.php';
+require_once 'backend/models/MoodEntry.php';
+require_once 'backend/models/JournalEntry.php';
+require_once 'backend/models/Reminder.php';
+
+$database = new Database();
+$db = $database->getConnection();
+
+// Initialize models
+$moodEntry = new MoodEntry($db);
+$journalEntry = new JournalEntry($db);
+$reminder = new Reminder($db);
+
+// Get user stats
+$moodStreak = $moodEntry->getMoodStreak($_SESSION['user_id']);
+
+// Get journal entries count
+$journalCount = $journalEntry->getCountByUser($_SESSION['user_id']);
+
+// Get active reminders count
+$activeReminders = $reminder->getByUser($_SESSION['user_id']);
+$activeRemindersCount = count($activeReminders);
+
+// Get today's mood if exists
+$todayMood = $moodEntry->getByUserAndDate($_SESSION['user_id'], date('Y-m-d'));
+$todayMoodValue = $todayMood ? $moodEntry->mood_value : null;
+$todayMoodNote = $todayMood ? $moodEntry->mood_note : null;
+
+// Get recent journal entries
+$recentJournals = $journalEntry->getByUser($_SESSION['user_id'], 3, 0);
+
+// Get privacy score (always 100% for now, could be enhanced later)
+$privacyScore = 100;
 ?>
 
 <!DOCTYPE html>
@@ -401,12 +437,40 @@ $user_name = $_SESSION['user_name'] ?? 'User';
                 <div class="dashboard-card today-mood">
                     <h3><i class="fas fa-smile"></i> Today's Mood</h3>
                     <div class="mood-display">
-                        <div class="today-mood-emoji">😊</div>
-                        <span class="mood-number">7/10</span>
-                        <span class="mood-label">Good</span>
-                        <div class="mood-note">
-                            "Had a productive day at school. Feeling optimistic!"
-                        </div>
+                        <?php if ($todayMoodValue !== null): ?>
+                            <div class="today-mood-emoji">
+                                <?php
+                                if ($todayMoodValue <= 3) echo '😢';
+                                elseif ($todayMoodValue <= 5) echo '😞';
+                                elseif ($todayMoodValue <= 7) echo '🙂';
+                                elseif ($todayMoodValue <= 9) echo '😊';
+                                else echo '😄';
+                                ?>
+                            </div>
+                            <span class="mood-number"><?php echo $todayMoodValue; ?>/10</span>
+                            <span class="mood-label">
+                                <?php
+                                if ($todayMoodValue <= 3) echo 'Very Low';
+                                elseif ($todayMoodValue <= 5) echo 'Low';
+                                elseif ($todayMoodValue <= 7) echo 'Good';
+                                elseif ($todayMoodValue <= 9) echo 'Great';
+                                else echo 'Excellent';
+                                ?>
+                            </span>
+                            <?php if ($todayMoodNote): ?>
+                                <div class="mood-note">
+                                    "<?php echo htmlspecialchars($todayMoodNote); ?>"
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div class="no-mood">
+                                <div class="today-mood-emoji">❓</div>
+                                <span class="mood-label">No mood recorded yet</span>
+                                <a href="mood-tracker.php" class="btn-primary" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; text-decoration: none; border-radius: 5px;">
+                                    <i class="fas fa-plus"></i> Log Mood
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -415,19 +479,19 @@ $user_name = $_SESSION['user_name'] ?? 'User';
                     <h3><i class="fas fa-chart-line"></i> Quick Stats</h3>
                     <div class="stats-grid">
                         <div class="stat-item">
-                            <span class="stat-number">5</span>
+                            <span class="stat-number"><?php echo $moodStreak; ?></span>
                             <span class="stat-label">Day Streak</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">12</span>
+                            <span class="stat-number"><?php echo $journalCount; ?></span>
                             <span class="stat-label">Journal Entries</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">3</span>
+                            <span class="stat-number"><?php echo $activeRemindersCount; ?></span>
                             <span class="stat-label">Active Reminders</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-number">100%</span>
+                            <span class="stat-number"><?php echo $privacyScore; ?>%</span>
                             <span class="stat-label">Privacy Score</span>
                         </div>
                     </div>
