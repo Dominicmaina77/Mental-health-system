@@ -128,6 +128,24 @@
                         <option value="bar">Bar Chart</option>
                     </select>
                 </div>
+                <div>
+                    <label for="mood-range" style="display: inline-block; margin-right: 0.5rem; color: var(--text-dark); font-weight: 500;">Mood Range:</label>
+                    <select id="mood-range" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue); background: var(--white); color: var(--text-dark);">
+                        <option value="all">All Moods</option>
+                        <option value="low">Low (1-3)</option>
+                        <option value="medium">Medium (4-7)</option>
+                        <option value="high">High (8-10)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="data-category" style="display: inline-block; margin-right: 0.5rem; color: var(--text-dark); font-weight: 500;">Category:</label>
+                    <select id="data-category" style="padding: 0.5rem; border-radius: 8px; border: 2px solid var(--pastel-blue); background: var(--white); color: var(--text-dark);">
+                        <option value="all">All Data</option>
+                        <option value="mood">Mood Only</option>
+                        <option value="journal">Journal Only</option>
+                        <option value="both">Mood & Journal</option>
+                    </select>
+                </div>
             </div>
 
             <div class="chart-grid">
@@ -253,15 +271,21 @@
             }
 
             // Load insights data from API with date range filter
-            async function loadInsightsData(dateRange = null) {
+            async function loadInsightsData(dateRange = null, moodRange = null, dataCategory = null) {
                 try {
-                    // Get date range from filter if not provided
+                    // Get parameters from filters if not provided
                     if (dateRange === null) {
                         dateRange = parseInt(document.getElementById('date-range').value);
                     }
+                    if (moodRange === null) {
+                        moodRange = document.getElementById('mood-range').value;
+                    }
+                    if (dataCategory === null) {
+                        dataCategory = document.getElementById('data-category').value;
+                    }
 
                     // For now, we're using the general insights API
-                    // In a real implementation, we would pass the date range to the API
+                    // In a real implementation, we would pass these parameters to the API
                     const insightsResponse = await apiService.getInsights();
                     if (insightsResponse && insightsResponse.insights) {
                         const insights = insightsResponse.insights;
@@ -704,14 +728,27 @@
             }
 
             // Add event listeners for filter controls
-            document.getElementById('date-range').addEventListener('change', function() {
-                loadInsightsData(parseInt(this.value));
-            });
+            function setupFilterEventListeners() {
+                document.getElementById('date-range').addEventListener('change', function() {
+                    loadInsightsData(parseInt(this.value));
+                });
 
-            document.getElementById('chart-type').addEventListener('change', function() {
-                // Reload charts with new chart type
-                loadInsightsData();
-            });
+                document.getElementById('chart-type').addEventListener('change', function() {
+                    // Reload charts with new chart type
+                    loadInsightsData();
+                });
+
+                document.getElementById('mood-range').addEventListener('change', function() {
+                    loadInsightsData(null, this.value);
+                });
+
+                document.getElementById('data-category').addEventListener('change', function() {
+                    loadInsightsData(null, null, this.value);
+                });
+            }
+
+            // Call the function to set up event listeners
+            setupFilterEventListeners();
 
             // Initialize insights data
             loadInsightsData();
