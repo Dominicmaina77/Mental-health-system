@@ -445,19 +445,19 @@ $user_name = $_SESSION['user_name'] ?? 'User';
                 <div class="dashboard-card quick-actions">
                     <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
                     <div class="actions-grid">
-                        <a href="mood-tracker.html" class="action-btn">
+                        <a href="mood-tracker.php" class="action-btn">
                             <div class="action-icon">😊</div>
                             <div class="action-label">Log Mood</div>
                         </a>
-                        <a href="journal.html" class="action-btn">
+                        <a href="journal.php" class="action-btn">
                             <div class="action-icon">📝</div>
                             <div class="action-label">New Journal</div>
                         </a>
-                        <a href="insights.html" class="action-btn">
+                        <a href="insights.php" class="action-btn">
                             <div class="action-icon">📊</div>
                             <div class="action-label">View Insights</div>
                         </a>
-                        <a href="reminders.html" class="action-btn">
+                        <a href="reminders.php" class="action-btn">
                             <div class="action-icon">🔔</div>
                             <div class="action-label">Set Reminder</div>
                         </a>
@@ -465,7 +465,7 @@ $user_name = $_SESSION['user_name'] ?? 'User';
                             <div class="action-icon">📚</div>
                             <div class="action-label">Resources</div>
                         </a>
-                        <a href="profile.html" class="action-btn">
+                        <a href="profile.php" class="action-btn">
                             <div class="action-icon">⚙️</div>
                             <div class="action-label">Settings</div>
                         </a>
@@ -490,7 +490,7 @@ $user_name = $_SESSION['user_name'] ?? 'User';
                         </div>
                     </div>
                     <div class="view-all">
-                        <a href="journal.html">View All Entries <i class="fas fa-arrow-right"></i></a>
+                        <a href="journal.php">View All Entries <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
 
@@ -527,7 +527,7 @@ $user_name = $_SESSION['user_name'] ?? 'User';
                         </div>
                     </div>
                     <div class="view-all">
-                        <a href="reminders.html">Manage Reminders <i class="fas fa-arrow-right"></i></a>
+                        <a href="reminders.php">Manage Reminders <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
 
