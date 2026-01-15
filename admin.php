@@ -498,7 +498,7 @@ try {
             <ul class="nav-links">
                 <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="admin.php" class="active">Admin Panel</a></li>
-                <li><a href="profile.html">Profile</a></li>
+                <li><a href="profile.php">Profile</a></li>
                 <li><a href="logout.php" class="btn-login">Log Out</a></li>
             </ul>
             <div class="menu-btn">
