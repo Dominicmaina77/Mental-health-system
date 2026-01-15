@@ -110,6 +110,27 @@
             border-radius: 8px;
             margin-bottom: 1rem;
             border-left: 4px solid var(--medium-blue);
+            max-height: 300px; /* Limit height of each entry */
+            overflow-y: auto; /* Allow scrolling within each entry */
+        }
+
+        /* Custom scrollbar for individual entries */
+        .journal-entry::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .journal-entry::-webkit-scrollbar-track {
+            background: var(--pastel-blue);
+            border-radius: 3px;
+        }
+
+        .journal-entry::-webkit-scrollbar-thumb {
+            background: var(--medium-blue);
+            border-radius: 3px;
+        }
+
+        .journal-entry::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-blue);
         }
         
         .entry-header {
@@ -506,18 +527,8 @@
                             saveNewEntry();
                         };
 
-                        // Update the specific entry in the list instead of reloading all entries
-                        const entryElement = document.querySelector(`.journal-entry[data-entry-id="${entryId}"]`);
-                        if (entryElement) {
-                            // Update the content of the existing entry
-                            const titleElement = entryElement.querySelector('.entry-header strong');
-                            const contentElement = entryElement.querySelector('p');
-
-                            titleElement.textContent = title || 'Untitled Entry';
-                            contentElement.textContent = content.substring(0, 150) +
-                                (content.length > 150 ? '...' : '');
-                        }
-
+                        // Reload entries to ensure consistency and prevent any duplication issues
+                        loadJournalEntries();
                         loadJournalStats(); // Update stats after update
                     } else {
                         alert(response.error || 'Failed to update entry. Please try again.');
