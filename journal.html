@@ -304,53 +304,7 @@
                 });
             });
 
-            document.getElementById('save-entry').addEventListener('click', async function() {
-                const title = document.getElementById('entry-title').value.trim();
-                const content = document.getElementById('entry-content').value.trim();
-
-                if (!content) {
-                    alert('Please write something in your journal entry.');
-                    return;
-                }
-
-                const btn = this;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-                btn.disabled = true;
-
-                try {
-                    // Prepare journal data
-                    const journalData = {
-                        title: title || null,
-                        content: content,
-                        tags: selectedTags
-                    };
-
-                    // Save journal entry to API
-                    const response = await apiService.createJournalEntry(journalData);
-
-                    if (response && response.id) {
-                        alert('Entry saved successfully! ✨');
-
-                        // Clear form
-                        document.getElementById('entry-title').value = '';
-                        document.getElementById('entry-content').value = '';
-                        tagOptions.forEach(tag => tag.classList.remove('selected'));
-                        selectedTags.length = 0;
-
-                        // Reload entries to show the new one
-                        loadJournalEntries();
-                        loadJournalStats();
-                    } else {
-                        alert(response.error || 'Failed to save entry. Please try again.');
-                    }
-                } catch (error) {
-                    console.error('Error saving journal entry:', error);
-                    alert(error.message || 'An error occurred while saving your entry. Please try again.');
-                } finally {
-                    btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
-                    btn.disabled = false;
-                }
-            });
+            document.getElementById('save-entry').addEventListener('click', saveNewEntry);
 
             // Load journal entries from API
             async function loadJournalEntries() {
@@ -363,6 +317,7 @@
                         response.journal_entries.forEach(entry => {
                             const entryElement = document.createElement('div');
                             entryElement.className = 'journal-entry';
+                            entryElement.setAttribute('data-entry-id', entry.id); // Set entry ID for later use
 
                             // Format date
                             const date = new Date(entry.created_at);
@@ -374,12 +329,22 @@
                             entryElement.innerHTML = `
                                 <div class="entry-header">
                                     <strong>${entry.title || 'Untitled Entry'}</strong>
+                                    <div class="entry-actions">
+                                        <button class="btn-edit" title="Edit entry" data-entry-id="${entry.id}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-delete" title="Delete entry" data-entry-id="${entry.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="entry-date">
                                     <span style="font-size: 0.9rem; color: var(--text-light);">${formattedDate}</span>
                                 </div>
                                 <p>${entry.content.substring(0, 150)}${entry.content.length > 150 ? '...' : ''}</p>
                                 <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                                    ${selectedTags.length > 0 ?
-                                        selectedTags.map(tag =>
+                                    ${(entry.tags && entry.tags.length > 0) ?
+                                        entry.tags.map(tag =>
                                             `<span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${tag}</span>`
                                         ).join('') : ''}
                                 </div>
@@ -387,6 +352,9 @@
 
                             entriesContainer.appendChild(entryElement);
                         });
+
+                        // Add event listeners to the newly created edit and delete buttons
+                        attachEventListeners();
                     }
                 } catch (error) {
                     console.error('Error loading journal entries:', error);
@@ -417,9 +385,221 @@
                 }
             }
 
+            // Function to attach event listeners to edit and delete buttons
+            function attachEventListeners() {
+                // Add event listeners for edit buttons
+                const editButtons = document.querySelectorAll('.btn-edit');
+                editButtons.forEach(button => {
+                    button.removeEventListener('click', handleEditClick); // Remove any existing listener
+                    button.addEventListener('click', handleEditClick);
+                });
+
+                // Add event listeners for delete buttons
+                const deleteButtons = document.querySelectorAll('.btn-delete');
+                deleteButtons.forEach(button => {
+                    button.removeEventListener('click', handleDeleteClick); // Remove any existing listener
+                    button.addEventListener('click', handleDeleteClick);
+                });
+            }
+
+            // Handle edit button click
+            async function handleEditClick(event) {
+                const entryId = event.currentTarget.getAttribute('data-entry-id');
+
+                try {
+                    // Get the full entry details from the API
+                    const response = await apiService.getJournalEntryById(entryId);
+
+                    if (response && response.entry) {
+                        const entry = response.entry;
+
+                        // Populate the editor with the entry data
+                        document.getElementById('entry-title').value = entry.title || '';
+                        document.getElementById('entry-content').value = entry.content || '';
+
+                        // Select the appropriate tags
+                        tagOptions.forEach(tagOption => {
+                            const tagValue = tagOption.getAttribute('data-tag');
+                            if (entry.tags && entry.tags.includes(tagValue)) {
+                                tagOption.classList.add('selected');
+                                if (!selectedTags.includes(tagValue)) {
+                                    selectedTags.push(tagValue);
+                                }
+                            } else {
+                                tagOption.classList.remove('selected');
+                                const index = selectedTags.indexOf(tagValue);
+                                if (index > -1) selectedTags.splice(index, 1);
+                            }
+                        });
+
+                        // Change the save button to update button
+                        const saveButton = document.getElementById('save-entry');
+                        saveButton.innerHTML = '<i class="fas fa-sync-alt"></i> Update Entry';
+                        saveButton.onclick = function() {
+                            updateJournalEntry(entryId);
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error fetching journal entry for editing:', error);
+                    alert('Failed to load entry for editing. Please try again.');
+                }
+            }
+
+            // Update journal entry function
+            async function updateJournalEntry(entryId) {
+                const title = document.getElementById('entry-title').value.trim();
+                const content = document.getElementById('entry-content').value.trim();
+
+                if (!content) {
+                    alert('Please write something in your journal entry.');
+                    return;
+                }
+
+                const btn = document.getElementById('save-entry');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+                btn.disabled = true;
+
+                try {
+                    // Prepare journal data
+                    const journalData = {
+                        title: title || null,
+                        content: content,
+                        tags: selectedTags
+                    };
+
+                    // Update journal entry via API
+                    const response = await apiService.updateJournalEntry(entryId, journalData);
+
+                    if (response && response.success) {
+                        alert('Entry updated successfully! ✨');
+
+                        // Reset the form
+                        document.getElementById('entry-title').value = '';
+                        document.getElementById('entry-content').value = '';
+                        tagOptions.forEach(tag => tag.classList.remove('selected'));
+                        selectedTags.length = 0;
+
+                        // Restore the original save button
+                        btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
+                        btn.onclick = function() {
+                            saveNewEntry();
+                        };
+
+                        // Reload entries to show the updated one
+                        loadJournalEntries();
+                        loadJournalStats();
+                    } else {
+                        alert(response.error || 'Failed to update entry. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error updating journal entry:', error);
+                    alert(error.message || 'An error occurred while updating your entry. Please try again.');
+                } finally {
+                    btn.innerHTML = '<i class="fas fa-sync-alt"></i> Update Entry';
+                    btn.disabled = false;
+                }
+            }
+
+            // Handle delete button click
+            async function handleDeleteClick(event) {
+                const entryId = event.currentTarget.getAttribute('data-entry-id');
+
+                if (confirm('Are you sure you want to delete this journal entry? This action cannot be undone.')) {
+                    const btn = event.currentTarget;
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    btn.disabled = true;
+
+                    try {
+                        // Delete journal entry via API
+                        const response = await apiService.deleteJournalEntry(entryId);
+
+                        if (response && response.success) {
+                            // Remove the entry from the UI
+                            const entryElement = event.currentTarget.closest('.journal-entry');
+                            entryElement.style.opacity = '0';
+                            entryElement.style.transform = 'translateX(-20px)';
+
+                            setTimeout(() => {
+                                entryElement.remove();
+                                loadJournalStats(); // Update stats after deletion
+                            }, 300);
+
+                            alert('Entry deleted successfully!');
+                        } else {
+                            alert(response.error || 'Failed to delete entry. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting journal entry:', error);
+                        alert(error.message || 'An error occurred while deleting your entry. Please try again.');
+                    } finally {
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    }
+                }
+            }
+
+            // Modified save function to handle both new and updated entries
+            async function saveNewEntry() {
+                const title = document.getElementById('entry-title').value.trim();
+                const content = document.getElementById('entry-content').value.trim();
+
+                if (!content) {
+                    alert('Please write something in your journal entry.');
+                    return;
+                }
+
+                const btn = document.getElementById('save-entry');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                btn.disabled = true;
+
+                try {
+                    // Prepare journal data
+                    const journalData = {
+                        title: title || null,
+                        content: content,
+                        tags: selectedTags
+                    };
+
+                    // Save journal entry to API
+                    const response = await apiService.createJournalEntry(journalData);
+
+                    if (response && response.id) {
+                        alert('Entry saved successfully! ✨');
+
+                        // Clear form
+                        document.getElementById('entry-title').value = '';
+                        document.getElementById('entry-content').value = '';
+                        tagOptions.forEach(tag => tag.classList.remove('selected'));
+                        selectedTags.length = 0;
+
+                        // Restore the original save button
+                        btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
+                        btn.onclick = function() {
+                            saveNewEntry();
+                        };
+
+                        // Reload entries to show the new one
+                        loadJournalEntries();
+                        loadJournalStats();
+                    } else {
+                        alert(response.error || 'Failed to save entry. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error saving journal entry:', error);
+                    alert(error.message || 'An error occurred while saving your entry. Please try again.');
+                } finally {
+                    btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
+                    btn.disabled = false;
+                }
+            }
+
             // Initialize data
             loadJournalEntries();
             loadJournalStats();
+
+            // Attach event listeners to initial buttons
+            attachEventListeners();
         });
     </script>
 </body>
