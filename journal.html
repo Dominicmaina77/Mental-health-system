@@ -159,12 +159,13 @@
                     <input type="text" class="form-control" placeholder="Title (optional)" id="entry-title">
                     <textarea class="form-control" placeholder="Write your thoughts here..." id="entry-content"></textarea>
                     
-                    <div class="tags-container">
+                    <!-- Tags functionality not yet implemented in backend -->
+                    <!-- <div class="tags-container">
                         <div class="tag-option" data-tag="reflection">Reflection</div>
                         <div class="tag-option" data-tag="gratitude">Gratitude</div>
                         <div class="tag-option" data-tag="stress">Stress</div>
                         <div class="tag-option" data-tag="achievement">Achievement</div>
-                    </div>
+                    </div> -->
                     
                     <button class="btn-primary" id="save-entry" style="width: 100%;">
                         <i class="fas fa-save"></i> Save Entry
@@ -195,7 +196,7 @@
                             </div>
                             <p>Had a productive day. Feeling optimistic about the future. Practice gratitude for small wins.</p>
                             <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                                <span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">reflection</span>
+                                <!-- Tags functionality not yet implemented in backend -->
                             </div>
                         </div>
 
@@ -216,7 +217,7 @@
                             </div>
                             <p>Spent time with friends. Good reminder to balance work and social life.</p>
                             <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                                <span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">gratitude</span>
+                                <!-- Tags functionality not yet implemented in backend -->
                             </div>
                         </div>
                     </div>
@@ -286,23 +287,24 @@
                 return;
             }
 
-            const tagOptions = document.querySelectorAll('.tag-option');
-            const selectedTags = [];
-
-            tagOptions.forEach(tag => {
-                tag.addEventListener('click', function() {
-                    const tagValue = this.getAttribute('data-tag');
-
-                    if (this.classList.contains('selected')) {
-                        this.classList.remove('selected');
-                        const index = selectedTags.indexOf(tagValue);
-                        if (index > -1) selectedTags.splice(index, 1);
-                    } else {
-                        this.classList.add('selected');
-                        selectedTags.push(tagValue);
-                    }
-                });
-            });
+            // Tags functionality not yet implemented in backend
+            // const tagOptions = document.querySelectorAll('.tag-option');
+            // const selectedTags = [];
+            //
+            // tagOptions.forEach(tag => {
+            //     tag.addEventListener('click', function() {
+            //         const tagValue = this.getAttribute('data-tag');
+            //
+            //         if (this.classList.contains('selected')) {
+            //             this.classList.remove('selected');
+            //             const index = selectedTags.indexOf(tagValue);
+            //             if (index > -1) selectedTags.splice(index, 1);
+            //         } else {
+            //             this.classList.add('selected');
+            //             selectedTags.push(tagValue);
+            //         }
+            //     });
+            // });
 
             document.getElementById('save-entry').addEventListener('click', saveNewEntry);
 
@@ -343,10 +345,7 @@
                                 </div>
                                 <p>${entry.content.substring(0, 150)}${entry.content.length > 150 ? '...' : ''}</p>
                                 <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                                    ${(entry.tags && entry.tags.length > 0) ?
-                                        entry.tags.map(tag =>
-                                            `<span style="background-color: var(--pastel-blue); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${tag}</span>`
-                                        ).join('') : ''}
+                                    <!-- Tags functionality not yet implemented in backend -->
                                 </div>
                             `;
 
@@ -410,27 +409,12 @@
                     // Get the full entry details from the API
                     const response = await apiService.getJournalEntryById(entryId);
 
-                    if (response && response.entry) {
-                        const entry = response.entry;
+                    if (response && response.journal_entry) {
+                        const entry = response.journal_entry;
 
                         // Populate the editor with the entry data
                         document.getElementById('entry-title').value = entry.title || '';
                         document.getElementById('entry-content').value = entry.content || '';
-
-                        // Select the appropriate tags
-                        tagOptions.forEach(tagOption => {
-                            const tagValue = tagOption.getAttribute('data-tag');
-                            if (entry.tags && entry.tags.includes(tagValue)) {
-                                tagOption.classList.add('selected');
-                                if (!selectedTags.includes(tagValue)) {
-                                    selectedTags.push(tagValue);
-                                }
-                            } else {
-                                tagOption.classList.remove('selected');
-                                const index = selectedTags.indexOf(tagValue);
-                                if (index > -1) selectedTags.splice(index, 1);
-                            }
-                        });
 
                         // Change the save button to update button
                         const saveButton = document.getElementById('save-entry');
@@ -464,20 +448,18 @@
                     const journalData = {
                         title: title || null,
                         content: content,
-                        tags: selectedTags
+                        id: entryId  // Include the ID in the data
                     };
 
                     // Update journal entry via API
-                    const response = await apiService.updateJournalEntry(entryId, journalData);
+                    const response = await apiService.updateJournalEntry(journalData);
 
-                    if (response && response.success) {
+                    if (response && response.message) {
                         alert('Entry updated successfully! ✨');
 
                         // Reset the form
                         document.getElementById('entry-title').value = '';
                         document.getElementById('entry-content').value = '';
-                        tagOptions.forEach(tag => tag.classList.remove('selected'));
-                        selectedTags.length = 0;
 
                         // Restore the original save button
                         btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
@@ -514,7 +496,7 @@
                         // Delete journal entry via API
                         const response = await apiService.deleteJournalEntry(entryId);
 
-                        if (response && response.success) {
+                        if (response && response.message) {
                             // Remove the entry from the UI
                             const entryElement = event.currentTarget.closest('.journal-entry');
                             entryElement.style.opacity = '0';
@@ -557,8 +539,7 @@
                     // Prepare journal data
                     const journalData = {
                         title: title || null,
-                        content: content,
-                        tags: selectedTags
+                        content: content
                     };
 
                     // Save journal entry to API
@@ -570,8 +551,6 @@
                         // Clear form
                         document.getElementById('entry-title').value = '';
                         document.getElementById('entry-content').value = '';
-                        tagOptions.forEach(tag => tag.classList.remove('selected'));
-                        selectedTags.length = 0;
 
                         // Restore the original save button
                         btn.innerHTML = '<i class="fas fa-save"></i> Save Entry';
