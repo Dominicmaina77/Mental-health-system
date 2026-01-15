@@ -55,7 +55,17 @@ function generateToken($userId) {
  * Verify if user is authenticated
  */
 function isAuthenticated() {
-    return isset($_SESSION['user_id']);
+    // Check if user is authenticated via session
+    if (isset($_SESSION['user_id'])) {
+        return true;
+    }
+
+    // Also check if there's a valid token in the header that matches the session
+    if (function_exists('validateTokenFromHeader')) {
+        return validateTokenFromHeader();
+    }
+
+    return false;
 }
 
 /**
